@@ -1,9 +1,9 @@
 package org.ademun.timetableapi.repository;
 
-import org.ademun.timetableapi.entity.Professor;
+import org.ademun.timetableapi.model.Professor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProfessorRepository extends JpaRepository<Professor, Integer> {
+public interface ProfessorRepository extends JpaRepository<Professor, Long> {
 }
