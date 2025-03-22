@@ -31,7 +31,7 @@ public class GroupService {
     }
 
     @Transactional
-    public Group one(Long id) {
+    public Group one(Integer id) {
         log.info("Retrieving Group with id {}", id);
         return groupRepository.findById(id)
                               .orElseThrow();
@@ -44,7 +44,7 @@ public class GroupService {
     }
 
     @Transactional
-    public Group update(Long id, Group group) {
+    public Group update(Integer id, Group group) {
         log.info("Updating Group with id: {} with Group: {}", id, group);
         Group old = groupRepository.findById(id)
                                    .orElseThrow();
@@ -53,7 +53,7 @@ public class GroupService {
     }
 
     @Transactional
-    public Group delete(Long id) {
+    public Group delete(Integer id) {
         log.info("Deleting Group: {}", id);
         Group group = groupRepository.findById(id)
                                      .orElseThrow();

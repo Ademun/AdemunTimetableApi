@@ -31,7 +31,7 @@ public class ProfessorService {
     }
 
     @Transactional
-    public Professor one(Long id) {
+    public Professor one(Integer id) {
         log.info("Retrieving Professor with id {}", id);
         return professorRepository.findById(id).orElseThrow();
     }
@@ -43,7 +43,7 @@ public class ProfessorService {
     }
 
     @Transactional
-    public Professor update(Long id, Professor professor) {
+    public Professor update(Integer id, Professor professor) {
         log.info("Updating Professor with id: {} with Professor: {}", id, professor);
         Professor old = professorRepository.findById(id).orElseThrow();
         old.setFirstName(professor.getFirstName());
@@ -54,7 +54,7 @@ public class ProfessorService {
     }
 
     @Transactional
-    public Professor delete(Long id) {
+    public Professor delete(Integer id) {
         log.info("Deleting Professor: {}", id);
         Professor professor = professorRepository.findById(id).orElseThrow();
         professorRepository.deleteById(id);

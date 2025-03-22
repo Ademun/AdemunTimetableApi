@@ -54,12 +54,12 @@ public class LessonService {
         log.info("Retrieving Lessons by week {} and day {} and order {}", week, day, order);
         return byWeekDay(week, day)
                 .stream()
-                .filter(lesson -> lesson.getOrder().getId() == (long) order)
+                .filter(lesson -> lesson.getOrder().getId() == (Integer) order)
                 .toList();
     }
 
     @Transactional
-    public Lesson one(Long id) {
+    public Lesson one(Integer id) {
         log.info("Retrieving Lesson with id {}", id);
         return lessonRepository.findById(id).orElseThrow();
     }
@@ -71,7 +71,7 @@ public class LessonService {
     }
 
     @Transactional
-    public Lesson update(Long id, Lesson lesson) {
+    public Lesson update(Integer id, Lesson lesson) {
         log.info("Updating Lesson with id: {} with Lesson: {}", id, lesson);
         Lesson old = lessonRepository.findById(id).orElseThrow();
         old.setClassroom(lesson.getClassroom());
@@ -84,7 +84,7 @@ public class LessonService {
     }
 
     @Transactional
-    public Lesson delete(Long id) {
+    public Lesson delete(Integer id) {
         log.info("Deleting Lesson: {}", id);
         Lesson lesson = lessonRepository.findById(id).orElseThrow();
         lessonRepository.deleteById(id);

@@ -31,7 +31,7 @@ public class OrderService {
     }
 
     @Transactional
-    public Order one(Long id) {
+    public Order one(Integer id) {
         log.info("Retrieving Order with id {}", id);
         return orderRepository.findById(id).orElseThrow();
     }
@@ -43,7 +43,7 @@ public class OrderService {
     }
 
     @Transactional
-    public Order update(Long id, Order order) {
+    public Order update(Integer id, Order order) {
         log.info("Updating Order with id: {} with Order: {}", id, order);
         Order old = orderRepository.findById(id).orElseThrow();
         old.setDayOrder(order.getDayOrder());
@@ -53,7 +53,7 @@ public class OrderService {
     }
 
     @Transactional
-    public Order delete(Long id) {
+    public Order delete(Integer id) {
         log.info("Deleting Order: {}", id);
         Order order = orderRepository.findById(id).orElseThrow();
         orderRepository.deleteById(id);

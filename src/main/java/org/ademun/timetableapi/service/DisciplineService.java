@@ -31,7 +31,7 @@ public class DisciplineService {
     }
 
     @Transactional
-    public Discipline one(Long id) {
+    public Discipline one(Integer id) {
         log.info("Retrieving Discipline with id {}", id);
         return disciplineRepository.findById(id).orElseThrow();
     }
@@ -43,7 +43,7 @@ public class DisciplineService {
     }
 
     @Transactional
-    public Discipline update(Long id, Discipline discipline) {
+    public Discipline update(Integer id, Discipline discipline) {
         log.info("Updating Discipline with id: {} with Discipline: {}", id, discipline);
         Discipline old = disciplineRepository.findById(id).orElseThrow();
         old.setName(discipline.getName());
@@ -52,7 +52,7 @@ public class DisciplineService {
     }
 
     @Transactional
-    public Discipline delete(Long id) {
+    public Discipline delete(Integer id) {
         log.info("Deleting Discipline: {}", id);
         Discipline discipline = disciplineRepository.findById(id).orElseThrow();
         disciplineRepository.deleteById(id);

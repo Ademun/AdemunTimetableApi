@@ -31,7 +31,7 @@ public class DayService {
     }
 
     @Transactional
-    public Day one(Long id) {
+    public Day one(Integer id) {
         log.info("Retrieving Day with id {}", id);
         return dayRepository.findById(id).orElseThrow();
     }
@@ -43,7 +43,7 @@ public class DayService {
     }
 
     @Transactional
-    public Day update(Long id, Day day) {
+    public Day update(Integer id, Day day) {
         log.info("Updating Day with id: {} with Day: {}", id, day);
         Day old = dayRepository.findById(id).orElseThrow();
         old.setName(day.getName());
@@ -52,7 +52,7 @@ public class DayService {
     }
 
     @Transactional
-    public Day delete(Long id) {
+    public Day delete(Integer id) {
         log.info("Deleting Day: {}", id);
         Day day = dayRepository.findById(id).orElseThrow();
         dayRepository.deleteById(id);
