@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -36,7 +37,8 @@ public class LessonService {
         return lessonRepository
                 .findAll()
                 .stream()
-                .filter(lesson -> lesson.getDay().getWeek() == week)
+                .filter(lesson -> lesson.getDay()
+                                        .getWeek() == week)
                 .toList();
     }
 
@@ -45,7 +47,8 @@ public class LessonService {
         log.info("Retrieving Lessons by week {} and day {}", week, day);
         return byWeek(week)
                 .stream()
-                .filter(lesson -> (lesson.getDay().getId() - (7L * (week - 1)) == day))
+                .filter(lesson -> (lesson.getDay()
+                                         .getId() - (7L * (week - 1)) == day))
                 .toList();
     }
 
@@ -54,14 +57,16 @@ public class LessonService {
         log.info("Retrieving Lessons by week {} and day {} and order {}", week, day, order);
         return byWeekDay(week, day)
                 .stream()
-                .filter(lesson -> lesson.getOrder().getId() == (Integer) order)
+                .filter(lesson -> Objects.equals(lesson.getOrder()
+                                                       .getId(), order))
                 .toList();
     }
 
     @Transactional
     public Lesson one(Integer id) {
         log.info("Retrieving Lesson with id {}", id);
-        return lessonRepository.findById(id).orElseThrow();
+        return lessonRepository.findById(id)
+                               .orElseThrow();
     }
 
     @Transactional
@@ -73,7 +78,8 @@ public class LessonService {
     @Transactional
     public Lesson update(Integer id, Lesson lesson) {
         log.info("Updating Lesson with id: {} with Lesson: {}", id, lesson);
-        Lesson old = lessonRepository.findById(id).orElseThrow();
+        Lesson old = lessonRepository.findById(id)
+                                     .orElseThrow();
         old.setClassroom(lesson.getClassroom());
         old.setProfessor(lesson.getProfessor());
         old.setDay(lesson.getDay());
@@ -86,7 +92,8 @@ public class LessonService {
     @Transactional
     public Lesson delete(Integer id) {
         log.info("Deleting Lesson: {}", id);
-        Lesson lesson = lessonRepository.findById(id).orElseThrow();
+        Lesson lesson = lessonRepository.findById(id)
+                                        .orElseThrow();
         lessonRepository.deleteById(id);
         return lesson;
     }
