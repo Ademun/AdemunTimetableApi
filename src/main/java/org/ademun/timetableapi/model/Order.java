@@ -3,7 +3,6 @@ package org.ademun.timetableapi.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.time.LocalTime;
 import java.util.LinkedHashSet;
@@ -11,17 +10,16 @@ import java.util.Set;
 
 @Getter
 @Setter
-@ToString
 @Entity
-@Table(name = "orders", schema = "timetable")
+@Table(name = "orders", schema = "timetable_api")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Long id;
+    private Integer id;
 
     @Column(name = "day_order", nullable = false)
-    private int dayOrder;
+    private Integer dayOrder;
 
     @Column(name = "time_start", nullable = false)
     private LocalTime timeStart;

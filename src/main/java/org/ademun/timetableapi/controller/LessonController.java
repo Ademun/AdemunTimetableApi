@@ -32,7 +32,7 @@ public class LessonController {
     }
 
     @GetMapping(value = "/{id}")
-    public EntityModel<Lesson> one(@PathVariable Long id) {
+    public EntityModel<Lesson> one(@PathVariable Integer id) {
         return lessonAssembler.toModel(lessonService.one(id));
     }
 
@@ -60,12 +60,12 @@ public class LessonController {
     }
 
     @PutMapping(value = "/{id}")
-    public EntityModel<Lesson> update(@PathVariable Long id, @RequestBody Lesson lesson) {
+    public EntityModel<Lesson> update(@PathVariable Integer id, @RequestBody Lesson lesson) {
         return lessonAssembler.toModel(lessonService.update(id, lesson));
     }
 
     @DeleteMapping(value = "/{id}")
-    public EntityModel<Lesson> delete(@PathVariable("id") Long id) {
+    public EntityModel<Lesson> delete(@PathVariable("id") Integer id) {
         return lessonAssembler.toModel(lessonService.delete(id));
     }
 }

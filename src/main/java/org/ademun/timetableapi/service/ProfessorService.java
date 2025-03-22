@@ -46,9 +46,9 @@ public class ProfessorService {
     public Professor update(Long id, Professor professor) {
         log.info("Updating Professor with id: {} with Professor: {}", id, professor);
         Professor old = professorRepository.findById(id).orElseThrow();
-        old.setName(professor.getName());
+        old.setFirstName(professor.getFirstName());
         old.setSecondName(professor.getSecondName());
-        old.setThirdName(professor.getThirdName());
+        old.setPatronymic(professor.getPatronymic());
         old.setUrl(professor.getUrl());
         return professorRepository.save(old);
     }

@@ -32,7 +32,7 @@ public class OrderController {
     }
 
     @GetMapping(value = "/{id}")
-    public EntityModel<Order> one(@PathVariable Long id) {
+    public EntityModel<Order> one(@PathVariable Integer id) {
         return orderMapper.toModel(orderService.one(id));
     }
 
@@ -42,12 +42,12 @@ public class OrderController {
     }
 
     @PutMapping(value = "/{id}")
-    public EntityModel<Order> update(@PathVariable Long id, @RequestBody Order order) {
+    public EntityModel<Order> update(@PathVariable Integer id, @RequestBody Order order) {
         return orderMapper.toModel(orderService.update(id, order));
     }
 
     @DeleteMapping(value = "/{id}")
-    public EntityModel<Order> delete(@PathVariable("id") Long id) {
+    public EntityModel<Order> delete(@PathVariable("id") Integer id) {
         return orderMapper.toModel(orderService.delete(id));
     }
 }

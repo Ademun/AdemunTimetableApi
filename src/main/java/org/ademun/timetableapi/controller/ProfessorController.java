@@ -32,7 +32,7 @@ public class ProfessorController {
     }
 
     @GetMapping(value = "/{id}")
-    public EntityModel<Professor> one(@PathVariable Long id) {
+    public EntityModel<Professor> one(@PathVariable Integer id) {
         return professorMapper.toModel(professorService.one(id));
     }
 
@@ -42,12 +42,12 @@ public class ProfessorController {
     }
 
     @PutMapping(value = "/{id}")
-    public EntityModel<Professor> update(@PathVariable Long id, @RequestBody Professor professor) {
+    public EntityModel<Professor> update(@PathVariable Integer id, @RequestBody Professor professor) {
         return professorMapper.toModel(professorService.update(id, professor));
     }
 
     @DeleteMapping(value = "/{id}")
-    public EntityModel<Professor> delete(@PathVariable("id") Long id) {
+    public EntityModel<Professor> delete(@PathVariable("id") Integer id) {
         return professorMapper.toModel(professorService.delete(id));
     }
 }

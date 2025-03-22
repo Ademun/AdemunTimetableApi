@@ -32,7 +32,7 @@ public class DayController {
     }
 
     @GetMapping(value = "/{id}")
-    public EntityModel<Day> one(@PathVariable Long id) {
+    public EntityModel<Day> one(@PathVariable Integer id) {
         return dayMapper.toModel(dayService.one(id));
     }
 
@@ -42,12 +42,12 @@ public class DayController {
     }
 
     @PutMapping(value = "/{id}")
-    public EntityModel<Day> update(@PathVariable Long id, @RequestBody Day day) {
+    public EntityModel<Day> update(@PathVariable Integer id, @RequestBody Day day) {
         return dayMapper.toModel(dayService.update(id, day));
     }
 
     @DeleteMapping(value = "/{id}")
-    public EntityModel<Day> delete(@PathVariable("id") Long id) {
+    public EntityModel<Day> delete(@PathVariable("id") Integer id) {
         return dayMapper.toModel(dayService.delete(id));
     }
 }

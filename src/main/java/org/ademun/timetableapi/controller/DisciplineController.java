@@ -32,7 +32,7 @@ public class DisciplineController {
     }
 
     @GetMapping(value = "/{id}")
-    public EntityModel<Discipline> one(@PathVariable Long id) {
+    public EntityModel<Discipline> one(@PathVariable Integer id) {
         return disciplineMapper.toModel(disciplineService.one(id));
     }
 
@@ -42,12 +42,12 @@ public class DisciplineController {
     }
 
     @PutMapping(value = "/{id}")
-    public EntityModel<Discipline> update(@PathVariable Long id, @RequestBody Discipline discipline) {
+    public EntityModel<Discipline> update(@PathVariable Integer id, @RequestBody Discipline discipline) {
         return disciplineMapper.toModel(disciplineService.update(id, discipline));
     }
 
     @DeleteMapping(value = "/{id}")
-    public EntityModel<Discipline> delete(@PathVariable("id") Long id) {
+    public EntityModel<Discipline> delete(@PathVariable("id") Integer id) {
         return disciplineMapper.toModel(disciplineService.delete(id));
     }
 }
