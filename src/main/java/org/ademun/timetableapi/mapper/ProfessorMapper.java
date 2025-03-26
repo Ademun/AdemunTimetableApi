@@ -11,12 +11,13 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class ProfessorMapper implements RepresentationModelAssembler<Professor, EntityModel<Professor>> {
-    @NonNull
-    @Override
-    public EntityModel<Professor> toModel(@NonNull Professor professor) {
-        return EntityModel.of(professor,
-                linkTo(methodOn(ProfessorController.class).one(professor.getId())).withSelfRel(),
-                linkTo(methodOn(ProfessorController.class).all()).withRel("professors"));
-    }
+public class ProfessorMapper
+    implements RepresentationModelAssembler<Professor, EntityModel<Professor>> {
+  @NonNull
+  @Override
+  public EntityModel<Professor> toModel(@NonNull Professor professor) {
+    return EntityModel.of(professor,
+        linkTo(methodOn(ProfessorController.class).one(professor.getId())).withSelfRel(),
+        linkTo(methodOn(ProfessorController.class).all()).withRel("professors"));
+  }
 }

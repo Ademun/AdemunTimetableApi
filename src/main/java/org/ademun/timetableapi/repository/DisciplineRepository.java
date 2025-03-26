@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DisciplineRepository extends JpaRepository<Discipline, Integer> {
+  Boolean existsByName(String name);
+
+  Discipline findByName(String name);
 }

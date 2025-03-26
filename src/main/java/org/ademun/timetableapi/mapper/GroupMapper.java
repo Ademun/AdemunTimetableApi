@@ -12,11 +12,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class GroupMapper implements RepresentationModelAssembler<Group, EntityModel<Group>> {
-    @NonNull
-    @Override
-    public EntityModel<Group> toModel(@NonNull Group group) {
-        return EntityModel.of(group,
-                linkTo(methodOn(GroupController.class).one(group.getId())).withSelfRel(),
-                linkTo(methodOn(GroupController.class).all()).withRel("groups"));
-    }
+  @NonNull
+  @Override
+  public EntityModel<Group> toModel(@NonNull Group group) {
+    return EntityModel.of(group,
+        linkTo(methodOn(GroupController.class).one(group.getId())).withSelfRel(),
+        linkTo(methodOn(GroupController.class).all()).withRel("groups"));
+  }
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
@@ -12,21 +11,26 @@ import java.util.Set;
 @Entity
 @Table(name = "groups", schema = "timetable_api")
 public class Group {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
+  private Integer id;
 
-    @Column(name = "name", nullable = false, length = Integer.MAX_VALUE)
-    private String name;
+  @Column(name = "name", nullable = false, length = Integer.MAX_VALUE)
+  private String name;
 
-    @OneToMany(mappedBy = "group")
-    private Set<Day> days = new LinkedHashSet<>();
+  @OneToMany(mappedBy = "group")
+  private Set<Day> days;
 
-    @ManyToMany
-    private Set<Discipline> disciplines = new LinkedHashSet<>();
+  @ManyToMany(
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  @JoinTable(name = "groups_disciplines", joinColumns = @JoinColumn(name = "group_id"),
+      inverseJoinColumns = @JoinColumn(name = "discipline_id"))
+  private Set<Discipline> disciplines;
 
-    @ManyToMany
-    private Set<Professor> professors = new LinkedHashSet<>();
-
+  @ManyToMany(
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  @JoinTable(name = "groups_professors", joinColumns = @JoinColumn(name = "group_id"),
+      inverseJoinColumns = @JoinColumn(name = "professor_id"))
+  private Set<Professor> professors;
 }

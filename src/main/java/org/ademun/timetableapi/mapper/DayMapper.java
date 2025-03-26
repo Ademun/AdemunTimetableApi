@@ -12,11 +12,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class DayMapper implements RepresentationModelAssembler<Day, EntityModel<Day>> {
-    @NonNull
-    @Override
-    public EntityModel<Day> toModel(@NonNull Day day) {
-        return EntityModel.of(day,
-                linkTo(methodOn(DayController.class).one(day.getId())).withSelfRel(),
-                linkTo(methodOn(DayController.class).all()).withRel("days"));
-    }
+  @NonNull
+  @Override
+  public EntityModel<Day> toModel(@NonNull Day day) {
+    return EntityModel.of(day, linkTo(methodOn(DayController.class).one(day.getId())).withSelfRel(),
+        linkTo(methodOn(DayController.class).all()).withRel("days"));
+  }
 }

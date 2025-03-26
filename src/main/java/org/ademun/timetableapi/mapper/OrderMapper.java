@@ -12,11 +12,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class OrderMapper implements RepresentationModelAssembler<Order, EntityModel<Order>> {
-    @NonNull
-    @Override
-    public EntityModel<Order> toModel(@NonNull Order order) {
-        return EntityModel.of(order,
-                linkTo(methodOn(OrderController.class).one(order.getId())).withSelfRel(),
-                linkTo(methodOn(OrderController.class).all()).withRel("orders"));
-    }
+  @NonNull
+  @Override
+  public EntityModel<Order> toModel(@NonNull Order order) {
+    return EntityModel.of(order,
+        linkTo(methodOn(OrderController.class).one(order.getId())).withSelfRel(),
+        linkTo(methodOn(OrderController.class).all()).withRel("orders"));
+  }
 }

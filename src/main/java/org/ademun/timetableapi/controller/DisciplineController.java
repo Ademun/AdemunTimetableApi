@@ -16,38 +16,42 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/timetable/disciplines")
 public class DisciplineController {
-    private final DisciplineService disciplineService;
-    private final DisciplineMapper disciplineMapper;
+  private final DisciplineService disciplineService;
+  private final DisciplineMapper disciplineMapper;
 
-    @Autowired
-    public DisciplineController(DisciplineService disciplineService, DisciplineMapper disciplineMapper) {
-        this.disciplineService = disciplineService;
-        this.disciplineMapper = disciplineMapper;
-    }
+  @Autowired
+  public DisciplineController(DisciplineService disciplineService,
+      DisciplineMapper disciplineMapper) {
+    this.disciplineService = disciplineService;
+    this.disciplineMapper = disciplineMapper;
+  }
 
-    @GetMapping(value = "/")
-    public CollectionModel<EntityModel<Discipline>> all() {
-        List<EntityModel<Discipline>> disciplineModelList = disciplineService.all().stream().map(disciplineMapper::toModel).toList();
-        return CollectionModel.of(disciplineModelList, linkTo(methodOn(DisciplineController.class).all()).withSelfRel());
-    }
+  @GetMapping(value = "/")
+  public CollectionModel<EntityModel<Discipline>> all() {
+    List<EntityModel<Discipline>> disciplineModelList =
+        disciplineService.all().stream().map(disciplineMapper::toModel).toList();
+    return CollectionModel.of(disciplineModelList,
+        linkTo(methodOn(DisciplineController.class).all()).withSelfRel());
+  }
 
-    @GetMapping(value = "/{id}")
-    public EntityModel<Discipline> one(@PathVariable Integer id) {
-        return disciplineMapper.toModel(disciplineService.one(id));
-    }
+  @GetMapping(value = "/{id}")
+  public EntityModel<Discipline> one(@PathVariable Integer id) {
+    return disciplineMapper.toModel(disciplineService.one(id));
+  }
 
-    @PostMapping(value = "/")
-    public EntityModel<Discipline> create(@RequestBody Discipline discipline) {
-        return disciplineMapper.toModel(disciplineService.create(discipline));
-    }
+  @PostMapping(value = "/")
+  public EntityModel<Discipline> create(@RequestBody Discipline discipline) {
+    return disciplineMapper.toModel(disciplineService.create(discipline));
+  }
 
-    @PutMapping(value = "/{id}")
-    public EntityModel<Discipline> update(@PathVariable Integer id, @RequestBody Discipline discipline) {
-        return disciplineMapper.toModel(disciplineService.update(id, discipline));
-    }
+  @PutMapping(value = "/{id}")
+  public EntityModel<Discipline> update(@PathVariable Integer id,
+      @RequestBody Discipline discipline) {
+    return disciplineMapper.toModel(disciplineService.update(id, discipline));
+  }
 
-    @DeleteMapping(value = "/{id}")
-    public EntityModel<Discipline> delete(@PathVariable("id") Integer id) {
-        return disciplineMapper.toModel(disciplineService.delete(id));
-    }
+  @DeleteMapping(value = "/{id}")
+  public EntityModel<Discipline> delete(@PathVariable("id") Integer id) {
+    return disciplineMapper.toModel(disciplineService.delete(id));
+  }
 }

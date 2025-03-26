@@ -16,38 +16,40 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/timetable/orders")
 public class OrderController {
-    private final OrderService orderService;
-    private final OrderMapper orderMapper;
+  private final OrderService orderService;
+  private final OrderMapper orderMapper;
 
-    @Autowired
-    public OrderController(OrderService orderService, OrderMapper orderMapper) {
-        this.orderService = orderService;
-        this.orderMapper = orderMapper;
-    }
+  @Autowired
+  public OrderController(OrderService orderService, OrderMapper orderMapper) {
+    this.orderService = orderService;
+    this.orderMapper = orderMapper;
+  }
 
-    @GetMapping(value = "/")
-    public CollectionModel<EntityModel<Order>> all() {
-        List<EntityModel<Order>> orderModelList = orderService.all().stream().map(orderMapper::toModel).toList();
-        return CollectionModel.of(orderModelList, linkTo(methodOn(OrderController.class).all()).withSelfRel());
-    }
+  @GetMapping(value = "/")
+  public CollectionModel<EntityModel<Order>> all() {
+    List<EntityModel<Order>> orderModelList =
+        orderService.all().stream().map(orderMapper::toModel).toList();
+    return CollectionModel.of(orderModelList,
+        linkTo(methodOn(OrderController.class).all()).withSelfRel());
+  }
 
-    @GetMapping(value = "/{id}")
-    public EntityModel<Order> one(@PathVariable Integer id) {
-        return orderMapper.toModel(orderService.one(id));
-    }
+  @GetMapping(value = "/{id}")
+  public EntityModel<Order> one(@PathVariable Integer id) {
+    return orderMapper.toModel(orderService.one(id));
+  }
 
-    @PostMapping(value = "/")
-    public EntityModel<Order> create(@RequestBody Order order) {
-        return orderMapper.toModel(orderService.create(order));
-    }
+  @PostMapping(value = "/")
+  public EntityModel<Order> create(@RequestBody Order order) {
+    return orderMapper.toModel(orderService.create(order));
+  }
 
-    @PutMapping(value = "/{id}")
-    public EntityModel<Order> update(@PathVariable Integer id, @RequestBody Order order) {
-        return orderMapper.toModel(orderService.update(id, order));
-    }
+  @PutMapping(value = "/{id}")
+  public EntityModel<Order> update(@PathVariable Integer id, @RequestBody Order order) {
+    return orderMapper.toModel(orderService.update(id, order));
+  }
 
-    @DeleteMapping(value = "/{id}")
-    public EntityModel<Order> delete(@PathVariable("id") Integer id) {
-        return orderMapper.toModel(orderService.delete(id));
-    }
+  @DeleteMapping(value = "/{id}")
+  public EntityModel<Order> delete(@PathVariable("id") Integer id) {
+    return orderMapper.toModel(orderService.delete(id));
+  }
 }

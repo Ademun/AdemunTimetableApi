@@ -12,11 +12,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class LessonMapper implements RepresentationModelAssembler<Lesson, EntityModel<Lesson>> {
-    @NonNull
-    @Override
-    public EntityModel<Lesson> toModel(@NonNull Lesson lesson) {
-        return EntityModel.of(lesson,
-                linkTo(methodOn(LessonController.class).one(lesson.getId())).withSelfRel(),
-                linkTo(methodOn(LessonController.class).all()).withRel("lessons"));
-    }
+  @NonNull
+  @Override
+  public EntityModel<Lesson> toModel(@NonNull Lesson lesson) {
+    return EntityModel.of(lesson,
+        linkTo(methodOn(LessonController.class).one(lesson.getId())).withSelfRel(),
+        linkTo(methodOn(LessonController.class).all()).withRel("lessons"));
+  }
 }
