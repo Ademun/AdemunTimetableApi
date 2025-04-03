@@ -42,6 +42,12 @@ public class GroupService {
 
   @Transactional
   public void deleteById(Long id) {
+    Group group = groupRepository.findById(id).orElse(null);
+    if (group == null) {
+      return;
+    }
+    group.getDisciplines().forEach(discipline -> discipline.getGroups().remove(group));
+    group.getProfessors().forEach(professor -> professor.getGroups().remove(group));
     groupRepository.deleteById(id);
   }
 
@@ -67,8 +73,8 @@ public class GroupService {
     if (group == null)
       return;
     Discipline uniqueDiscipline = getUniqueDiscipline(discipline);
-    group.getDisciplines().add(uniqueDiscipline);
-    groupRepository.save(group);
+    uniqueDiscipline.getGroups().add(group);
+    entityManager.persist(uniqueDiscipline);
   }
 
   @Transactional
@@ -77,24 +83,26 @@ public class GroupService {
     if (group == null)
       return;
     Professor uniqueProfessor = getUniqueProfessor(professor);
-    group.getProfessors().add(uniqueProfessor);
-    groupRepository.save(group);
+    uniqueProfessor.getGroups().add(group);
+    entityManager.persist(uniqueProfessor);
   }
 
   @Transactional
-  public void removeDiscipline(Long id, Discipline discipline) {
+  public void removeDiscipline(Long id, Long discipline_id) {
     Group group = groupRepository.findById(id).orElse(null);
-    if (group == null)
+    Discipline discipline = entityManager.find(Discipline.class, discipline_id);
+    if (group == null || discipline == null)
       return;
-    group.getDisciplines().remove(discipline);
+    discipline.getGroups().remove(group);
   }
 
   @Transactional
-  public void removeProfessor(Long id, Professor professor) {
+  public void removeProfessor(Long id, Long professor_id) {
     Group group = groupRepository.findById(id).orElse(null);
-    if (group == null)
+    Professor professor = entityManager.find(Professor.class, professor_id);
+    if (group == null || professor == null)
       return;
-    group.getProfessors().remove(professor);
+    professor.getGroups().remove(group);
   }
 
   public Discipline getUniqueDiscipline(Discipline discipline) {

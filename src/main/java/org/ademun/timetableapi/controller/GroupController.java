@@ -44,14 +44,14 @@ public class GroupController {
     return ResponseEntity.ok(groupDto);
   }
 
-  @RequestMapping("/{id}/disciplines")
+  @RequestMapping("/{id}/disciplines/")
   public ResponseEntity<List<DisciplineDto>> getDisciplines(@PathVariable Long id) {
     List<DisciplineDto> disciplineDtoList =
         groupService.getDisciplines(id).stream().map(disciplineMapper::toDto).toList();
     return ResponseEntity.ok(disciplineDtoList);
   }
 
-  @RequestMapping("/{id}/professors")
+  @RequestMapping("/{id}/professors/")
   public ResponseEntity<List<ProfessorDto>> getProfessors(@PathVariable Long id) {
     List<ProfessorDto> professorDtoList =
         groupService.getProfessors(id).stream().map(professorMapper::toDto).toList();
@@ -64,15 +64,18 @@ public class GroupController {
     return ResponseEntity.ok(groupDto);
   }
 
-  @PostMapping("/{id}/disciplines")
-  public ResponseEntity<?> createDiscipline(@PathVariable Long id, DisciplineDto disciplineDto) {
+  @PostMapping("/{id}/disciplines/")
+  public ResponseEntity<?> createDiscipline(@PathVariable Long id,
+      @RequestBody DisciplineDto disciplineDto) {
     Discipline discipline = disciplineMapper.fromDto(disciplineDto);
+    System.out.println(disciplineDto + " " + discipline);
     groupService.addDiscipline(id, discipline);
     return ResponseEntity.ok().build();
   }
 
-  @PostMapping("/{id}/professors")
-  public ResponseEntity<?> createProfessor(@PathVariable Long id, ProfessorDto professorDto) {
+  @PostMapping("/{id}/professors/")
+  public ResponseEntity<?> createProfessor(@PathVariable Long id,
+      @RequestBody ProfessorDto professorDto) {
     Professor professor = professorMapper.fromDto(professorDto);
     groupService.addProfessor(id, professor);
     return ResponseEntity.ok().build();
@@ -90,17 +93,17 @@ public class GroupController {
     return ResponseEntity.ok().build();
   }
 
-  @DeleteMapping("/{id}/disciplines")
-  public ResponseEntity<?> removeDiscipline(@PathVariable Long id, DisciplineDto disciplineDto) {
-    Discipline discipline = disciplineMapper.fromDto(disciplineDto);
-    groupService.removeDiscipline(id, discipline);
+  @DeleteMapping("/{group_id}/disciplines/{discipline_id}")
+  public ResponseEntity<?> removeDiscipline(@PathVariable Long group_id,
+      @PathVariable Long discipline_id) {
+    groupService.removeDiscipline(group_id, discipline_id);
     return ResponseEntity.ok().build();
   }
 
-  @DeleteMapping("/{id}/professors")
-  public ResponseEntity<?> removeProfessor(@PathVariable Long id, ProfessorDto professorDto) {
-    Professor professor = professorMapper.fromDto(professorDto);
-    groupService.removeProfessor(id, professor);
+  @DeleteMapping("/{group_id}/professors/{professor_id}")
+  public ResponseEntity<?> removeProfessor(@PathVariable Long group_id,
+      @PathVariable Long professor_id) {
+    groupService.removeProfessor(group_id, professor_id);
     return ResponseEntity.ok().build();
   }
 }
