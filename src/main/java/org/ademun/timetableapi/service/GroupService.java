@@ -26,7 +26,10 @@ public class GroupService {
   }
 
   @Transactional
-  public Group save(Group group) {
+  public Group save(Group group) throws IllegalArgumentException {
+    if (!groupRepository.findByGroupName(group.getName()).isEmpty()) {
+      throw new IllegalArgumentException("Group with this name already exists");
+    }
     return groupRepository.save(group);
   }
 

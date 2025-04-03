@@ -59,9 +59,13 @@ public class GroupController {
   }
 
   @PostMapping("/")
-  public ResponseEntity<GroupDto> createGroup(@RequestBody GroupDto group) {
-    GroupDto groupDto = groupMapper.toDto(groupService.save(groupMapper.fromDto(group)));
-    return ResponseEntity.ok(groupDto);
+  public ResponseEntity<?> createGroup(@RequestBody GroupDto group) {
+    try {
+      GroupDto groupDto = groupMapper.toDto(groupService.save(groupMapper.fromDto(group)));
+      return ResponseEntity.ok(groupDto);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body("A group with this name already exists");
+    }
   }
 
   @PostMapping("/{id}/disciplines/")
