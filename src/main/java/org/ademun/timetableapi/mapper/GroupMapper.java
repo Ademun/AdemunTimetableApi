@@ -1,22 +1,25 @@
 package org.ademun.timetableapi.mapper;
 
-import org.ademun.timetableapi.controller.GroupController;
-import org.ademun.timetableapi.model.Group;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.server.RepresentationModelAssembler;
-import org.springframework.lang.NonNull;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.ademun.timetableapi.dto.GroupDto;
+import org.ademun.timetableapi.entity.Group;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 @Component
-public class GroupMapper implements RepresentationModelAssembler<Group, EntityModel<Group>> {
-  @NonNull
-  @Override
-  public EntityModel<Group> toModel(@NonNull Group group) {
-    return EntityModel.of(group,
-        linkTo(methodOn(GroupController.class).one(group.getId())).withSelfRel(),
-        linkTo(methodOn(GroupController.class).all()).withRel("groups"));
+public class GroupMapper {
+  private final ObjectMapper mapper;
+
+  @Autowired
+  public GroupMapper(ObjectMapper mapper) {
+    this.mapper = mapper;
+  }
+
+  public Group fromDto(GroupDto dto) {
+    return mapper.convertValue(dto, Group.class);
+  }
+
+  public GroupDto toDto(Group group) {
+    return mapper.convertValue(group, GroupDto.class);
   }
 }

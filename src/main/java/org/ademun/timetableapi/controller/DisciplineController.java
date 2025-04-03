@@ -1,20 +1,16 @@
 package org.ademun.timetableapi.controller;
 
+import org.ademun.timetableapi.dto.DisciplineDto;
 import org.ademun.timetableapi.mapper.DisciplineMapper;
-import org.ademun.timetableapi.model.Discipline;
 import org.ademun.timetableapi.service.DisciplineService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 @RestController
-@RequestMapping("/timetable/disciplines")
+@RequestMapping("/api/disciplines")
 public class DisciplineController {
   private final DisciplineService disciplineService;
   private final DisciplineMapper disciplineMapper;
@@ -26,32 +22,37 @@ public class DisciplineController {
     this.disciplineMapper = disciplineMapper;
   }
 
-  @GetMapping(value = "/")
-  public CollectionModel<EntityModel<Discipline>> all() {
-    List<EntityModel<Discipline>> disciplineModelList =
-        disciplineService.all().stream().map(disciplineMapper::toModel).toList();
-    return CollectionModel.of(disciplineModelList,
-        linkTo(methodOn(DisciplineController.class).all()).withSelfRel());
+  @RequestMapping("/")
+  public ResponseEntity<List<DisciplineDto>> getDisciplines() {
+    List<DisciplineDto> disciplineDto =
+        disciplineService.findAll().stream().map(disciplineMapper::toDto).toList();
+    return ResponseEntity.ok(disciplineDto);
   }
 
-  @GetMapping(value = "/{id}")
-  public EntityModel<Discipline> one(@PathVariable Integer id) {
-    return disciplineMapper.toModel(disciplineService.one(id));
+  @RequestMapping("/{id}")
+  public ResponseEntity<DisciplineDto> getDiscipline(@PathVariable Long id) {
+    DisciplineDto disciplineDto =
+        disciplineMapper.toDto(disciplineService.findById(id).orElseThrow());
+    return ResponseEntity.ok(disciplineDto);
   }
 
-  @PostMapping(value = "/")
-  public EntityModel<Discipline> create(@RequestBody Discipline discipline) {
-    return disciplineMapper.toModel(disciplineService.create(discipline));
+  @PostMapping("/")
+  public ResponseEntity<DisciplineDto> createDiscipline(@RequestBody DisciplineDto discipline) {
+    DisciplineDto disciplineDto =
+        disciplineMapper.toDto(disciplineService.save(disciplineMapper.fromDto(discipline)));
+    return ResponseEntity.ok(disciplineDto);
   }
 
-  @PutMapping(value = "/{id}")
-  public EntityModel<Discipline> update(@PathVariable Integer id,
-      @RequestBody Discipline discipline) {
-    return disciplineMapper.toModel(disciplineService.update(id, discipline));
+  @PutMapping("/")
+  public ResponseEntity<DisciplineDto> updateDiscipline(@RequestBody DisciplineDto discipline) {
+    DisciplineDto disciplineDto =
+        disciplineMapper.toDto(disciplineService.save(disciplineMapper.fromDto(discipline)));
+    return ResponseEntity.ok(disciplineDto);
   }
 
-  @DeleteMapping(value = "/{id}")
-  public EntityModel<Discipline> delete(@PathVariable("id") Integer id) {
-    return disciplineMapper.toModel(disciplineService.delete(id));
+  @DeleteMapping("/{id}")
+  public ResponseEntity<?> deleteDiscipline(@PathVariable Long id) {
+    disciplineService.deleteById(id);
+    return ResponseEntity.ok().build();
   }
 }

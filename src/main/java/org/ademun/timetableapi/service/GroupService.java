@@ -2,18 +2,18 @@ package org.ademun.timetableapi.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
-import org.ademun.timetableapi.model.Discipline;
-import org.ademun.timetableapi.model.Group;
+import org.ademun.timetableapi.entity.Discipline;
+import org.ademun.timetableapi.entity.Group;
+import org.ademun.timetableapi.entity.Professor;
 import org.ademun.timetableapi.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-@Slf4j
 @Service
 public class GroupService {
   private final GroupRepository groupRepository;
@@ -26,52 +26,102 @@ public class GroupService {
   }
 
   @Transactional
-  public List<Group> all() {
-    log.info("Retrieving all Groups");
-    return groupRepository.findAll().stream().sorted(Comparator.comparing(Group::getId)).toList();
-  }
-
-  @Transactional
-  public Group one(Integer id) {
-    log.info("Retrieving Group with id {}", id);
-    return groupRepository.findById(id).orElseThrow();
-  }
-
-  @Transactional
-  public Group create(Group group) {
-    List<Discipline> disciplines = getAccordingDisciplines(group);
-    if (!disciplines.isEmpty()) {
-      group.setDisciplines(new LinkedHashSet<>(disciplines));
-      return groupRepository.save(group);
-    }
-    log.info("Creating Group: {}", group);
+  public Group save(Group group) {
     return groupRepository.save(group);
   }
 
-  private List<Discipline> getAccordingDisciplines(Group group) {
-    List<String> disciplineNames =
-        group.getDisciplines().stream().map(Discipline::getName).toList();
-    return entityManager.createQuery("SELECT d FROM Discipline d WHERE d.name IN :disciplineNames",
-        Discipline.class).setParameter("disciplineNames", disciplineNames).getResultList();
+  @Transactional
+  public List<Group> findAll() {
+    return groupRepository.findAll();
   }
 
   @Transactional
-  public Group update(Integer id, Group group) {
-    log.info("Updating Group with id: {} with Group: {}", id, group);
-    Group old = groupRepository.findById(id).orElseThrow();
-    old.setName(group.getName());
-    return groupRepository.save(old);
+  public Optional<Group> findById(Long id) {
+    return groupRepository.findById(id);
   }
 
   @Transactional
-  public Group delete(Integer id) {
-    log.info("Deleting Group: {}", id);
-    Group group = groupRepository.findById(id).orElseThrow();
-    List<Discipline> disciplines = getAccordingDisciplines(group);
+  public void deleteById(Long id) {
     groupRepository.deleteById(id);
-    for (Discipline discipline : disciplines) {
-      group.getDisciplines().remove(discipline);
+  }
+
+  @Transactional
+  public Set<Discipline> getDisciplines(Long id) {
+    Group group = groupRepository.findById(id).orElse(null);
+    if (group == null)
+      return Collections.emptySet();
+    return group.getDisciplines();
+  }
+
+  @Transactional
+  public Set<Professor> getProfessors(Long id) {
+    Group group = groupRepository.findById(id).orElse(null);
+    if (group == null)
+      return Collections.emptySet();
+    return group.getProfessors();
+  }
+
+  @Transactional
+  public void addDiscipline(Long id, Discipline discipline) {
+    Group group = groupRepository.findById(id).orElse(null);
+    if (group == null)
+      return;
+    Discipline uniqueDiscipline = getUniqueDiscipline(discipline);
+    group.getDisciplines().add(uniqueDiscipline);
+    groupRepository.save(group);
+  }
+
+  @Transactional
+  public void addProfessor(Long id, Professor professor) {
+    Group group = groupRepository.findById(id).orElse(null);
+    if (group == null)
+      return;
+    Professor uniqueProfessor = getUniqueProfessor(professor);
+    group.getProfessors().add(uniqueProfessor);
+    groupRepository.save(group);
+  }
+
+  @Transactional
+  public void removeDiscipline(Long id, Discipline discipline) {
+    Group group = groupRepository.findById(id).orElse(null);
+    if (group == null)
+      return;
+    group.getDisciplines().remove(discipline);
+  }
+
+  @Transactional
+  public void removeProfessor(Long id, Professor professor) {
+    Group group = groupRepository.findById(id).orElse(null);
+    if (group == null)
+      return;
+    group.getProfessors().remove(professor);
+  }
+
+  public Discipline getUniqueDiscipline(Discipline discipline) {
+    List<?> disciplineList =
+        entityManager.createQuery("SELECT d FROM Discipline d WHERE d.name = :name")
+            .setParameter("name", discipline.getName()).getResultList();
+    if (disciplineList.size() > 1) {
+      //TODO: log
     }
-    return group;
+    if (disciplineList.isEmpty()) {
+      return discipline;
+    }
+    return (Discipline) disciplineList.getFirst();
+  }
+
+  public Professor getUniqueProfessor(Professor professor) {
+    List<?> professorList = entityManager.createQuery(
+            "SELECT p FROM Professor p WHERE p.firstName= :firstName AND p.lastName= :lastName AND p.patronymic=:patronymic")
+        .setParameter("firstName", professor.getFirstName())
+        .setParameter("lastName", professor.getLastName())
+        .setParameter("patronymic", professor.getPatronymic()).getResultList();
+    if (professorList.size() > 1) {
+      //TODO: log
+    }
+    if (professorList.isEmpty()) {
+      return professor;
+    }
+    return (Professor) professorList.getFirst();
   }
 }

@@ -1,62 +1,106 @@
 package org.ademun.timetableapi.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.ademun.timetableapi.dto.DisciplineDto;
+import org.ademun.timetableapi.dto.GroupDto;
+import org.ademun.timetableapi.dto.ProfessorDto;
+import org.ademun.timetableapi.entity.Discipline;
+import org.ademun.timetableapi.entity.Professor;
+import org.ademun.timetableapi.mapper.DisciplineMapper;
 import org.ademun.timetableapi.mapper.GroupMapper;
-import org.ademun.timetableapi.model.Group;
+import org.ademun.timetableapi.mapper.ProfessorMapper;
 import org.ademun.timetableapi.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 @RestController
-@RequestMapping("/timetable/groups")
+@RequestMapping("/api/groups")
 public class GroupController {
   private final GroupService groupService;
   private final GroupMapper groupMapper;
-  private final ObjectMapper objectMapper;
+  private final DisciplineMapper disciplineMapper;
+  private final ProfessorMapper professorMapper;
 
   @Autowired
   public GroupController(GroupService groupService, GroupMapper groupMapper,
-      ObjectMapper objectMapper) {
+      DisciplineMapper disciplineMapper, ProfessorMapper professorMapper) {
     this.groupService = groupService;
     this.groupMapper = groupMapper;
-    this.objectMapper = objectMapper;
+    this.disciplineMapper = disciplineMapper;
+    this.professorMapper = professorMapper;
   }
 
-  @GetMapping(value = "/")
-  public CollectionModel<EntityModel<Group>> all() {
-    List<EntityModel<Group>> groupModelList =
-        groupService.all().stream().map(groupMapper::toModel).toList();
-    return CollectionModel.of(groupModelList,
-        linkTo(methodOn(GroupController.class).all()).withSelfRel());
+  @RequestMapping("/")
+  public ResponseEntity<List<GroupDto>> getGroups() {
+    List<GroupDto> groupDto = groupService.findAll().stream().map(groupMapper::toDto).toList();
+    return ResponseEntity.ok(groupDto);
   }
 
-  @GetMapping(value = "/{id}")
-  public EntityModel<Group> one(@PathVariable Integer id) {
-    return groupMapper.toModel(groupService.one(id));
+  @RequestMapping("/{id}")
+  public ResponseEntity<GroupDto> getGroup(@PathVariable Long id) {
+    GroupDto groupDto = groupMapper.toDto(groupService.findById(id).orElseThrow());
+    return ResponseEntity.ok(groupDto);
   }
 
-  @PostMapping(value = "/")
-  public EntityModel<Group> create(@RequestBody String group) throws JsonProcessingException {
-    Group parsedGroup = objectMapper.readValue(group, Group.class);
-    System.out.println(parsedGroup.toString());
-    return groupMapper.toModel(groupService.create(parsedGroup));
+  @RequestMapping("/{id}/disciplines")
+  public ResponseEntity<List<DisciplineDto>> getDisciplines(@PathVariable Long id) {
+    List<DisciplineDto> disciplineDtoList =
+        groupService.getDisciplines(id).stream().map(disciplineMapper::toDto).toList();
+    return ResponseEntity.ok(disciplineDtoList);
   }
 
-  @PutMapping(value = "/{id}")
-  public EntityModel<Group> update(@PathVariable Integer id, @RequestBody Group group) {
-    return groupMapper.toModel(groupService.update(id, group));
+  @RequestMapping("/{id}/professors")
+  public ResponseEntity<List<ProfessorDto>> getProfessors(@PathVariable Long id) {
+    List<ProfessorDto> professorDtoList =
+        groupService.getProfessors(id).stream().map(professorMapper::toDto).toList();
+    return ResponseEntity.ok(professorDtoList);
   }
 
-  @DeleteMapping(value = "/{id}")
-  public EntityModel<Group> delete(@PathVariable("id") Integer id) {
-    return groupMapper.toModel(groupService.delete(id));
+  @PostMapping("/")
+  public ResponseEntity<GroupDto> createGroup(@RequestBody GroupDto group) {
+    GroupDto groupDto = groupMapper.toDto(groupService.save(groupMapper.fromDto(group)));
+    return ResponseEntity.ok(groupDto);
+  }
+
+  @PostMapping("/{id}/disciplines")
+  public ResponseEntity<?> createDiscipline(@PathVariable Long id, DisciplineDto disciplineDto) {
+    Discipline discipline = disciplineMapper.fromDto(disciplineDto);
+    groupService.addDiscipline(id, discipline);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/{id}/professors")
+  public ResponseEntity<?> createProfessor(@PathVariable Long id, ProfessorDto professorDto) {
+    Professor professor = professorMapper.fromDto(professorDto);
+    groupService.addProfessor(id, professor);
+    return ResponseEntity.ok().build();
+  }
+
+  @PutMapping("/")
+  public ResponseEntity<GroupDto> updateGroup(@RequestBody GroupDto group) {
+    GroupDto groupDto = groupMapper.toDto(groupService.save(groupMapper.fromDto(group)));
+    return ResponseEntity.ok(groupDto);
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<?> deleteGroup(@PathVariable Long id) {
+    groupService.deleteById(id);
+    return ResponseEntity.ok().build();
+  }
+
+  @DeleteMapping("/{id}/disciplines")
+  public ResponseEntity<?> removeDiscipline(@PathVariable Long id, DisciplineDto disciplineDto) {
+    Discipline discipline = disciplineMapper.fromDto(disciplineDto);
+    groupService.removeDiscipline(id, discipline);
+    return ResponseEntity.ok().build();
+  }
+
+  @DeleteMapping("/{id}/professors")
+  public ResponseEntity<?> removeProfessor(@PathVariable Long id, ProfessorDto professorDto) {
+    Professor professor = professorMapper.fromDto(professorDto);
+    groupService.removeProfessor(id, professor);
+    return ResponseEntity.ok().build();
   }
 }
