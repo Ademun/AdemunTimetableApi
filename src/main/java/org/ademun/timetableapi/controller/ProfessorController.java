@@ -1,6 +1,8 @@
 package org.ademun.timetableapi.controller;
 
+import org.ademun.timetableapi.dto.GroupDto;
 import org.ademun.timetableapi.dto.ProfessorDto;
+import org.ademun.timetableapi.mapper.GroupMapper;
 import org.ademun.timetableapi.mapper.ProfessorMapper;
 import org.ademun.timetableapi.service.ProfessorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +16,14 @@ import java.util.List;
 public class ProfessorController {
   private final ProfessorService professorService;
   private final ProfessorMapper professorMapper;
+  private final GroupMapper groupMapper;
 
   @Autowired
-  public ProfessorController(ProfessorService professorService, ProfessorMapper professorMapper) {
+  public ProfessorController(ProfessorService professorService, ProfessorMapper professorMapper,
+      GroupMapper groupMapper) {
     this.professorService = professorService;
     this.professorMapper = professorMapper;
+    this.groupMapper = groupMapper;
   }
 
   @RequestMapping("/")
@@ -35,10 +40,14 @@ public class ProfessorController {
   }
 
   @PostMapping("/")
-  public ResponseEntity<ProfessorDto> createProfessor(@RequestBody ProfessorDto professor) {
-    ProfessorDto professorDto =
-        professorMapper.toDto(professorService.save(professorMapper.fromDto(professor)));
-    return ResponseEntity.ok(professorDto);
+  public ResponseEntity<?> createProfessor(@RequestBody ProfessorDto professor) {
+    try {
+      ProfessorDto professorDto =
+          professorMapper.toDto(professorService.save(professorMapper.fromDto(professor)));
+      return ResponseEntity.ok(professorDto);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body("Professor with this name already exists");
+    }
   }
 
   @PutMapping("/")
@@ -52,5 +61,12 @@ public class ProfessorController {
   public ResponseEntity<?> deleteProfessor(@PathVariable Long id) {
     professorService.deleteById(id);
     return ResponseEntity.ok().build();
+  }
+
+  @RequestMapping("/{id}/groups/")
+  public ResponseEntity<List<GroupDto>> getGroups(@PathVariable Long id) {
+    List<GroupDto> groupDtoList =
+        professorService.getGroups(id).stream().map(groupMapper::toDto).toList();
+    return ResponseEntity.ok(groupDtoList);
   }
 }
