@@ -1,7 +1,9 @@
 package org.ademun.timetableapi.controller;
 
 import org.ademun.timetableapi.dto.DisciplineDto;
+import org.ademun.timetableapi.dto.GroupDto;
 import org.ademun.timetableapi.mapper.DisciplineMapper;
+import org.ademun.timetableapi.mapper.GroupMapper;
 import org.ademun.timetableapi.service.DisciplineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +16,14 @@ import java.util.List;
 public class DisciplineController {
   private final DisciplineService disciplineService;
   private final DisciplineMapper disciplineMapper;
+  private final GroupMapper groupMapper;
 
   @Autowired
   public DisciplineController(DisciplineService disciplineService,
-      DisciplineMapper disciplineMapper) {
+      DisciplineMapper disciplineMapper, GroupMapper groupMapper) {
     this.disciplineService = disciplineService;
     this.disciplineMapper = disciplineMapper;
+    this.groupMapper = groupMapper;
   }
 
   @RequestMapping("/")
@@ -37,10 +41,14 @@ public class DisciplineController {
   }
 
   @PostMapping("/")
-  public ResponseEntity<DisciplineDto> createDiscipline(@RequestBody DisciplineDto discipline) {
-    DisciplineDto disciplineDto =
-        disciplineMapper.toDto(disciplineService.save(disciplineMapper.fromDto(discipline)));
-    return ResponseEntity.ok(disciplineDto);
+  public ResponseEntity<?> createDiscipline(@RequestBody DisciplineDto discipline) {
+    try {
+      DisciplineDto disciplineDto =
+          disciplineMapper.toDto(disciplineService.save(disciplineMapper.fromDto(discipline)));
+      return ResponseEntity.ok(disciplineDto);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body("Discipline with this name already exists");
+    }
   }
 
   @PutMapping("/")
@@ -54,5 +62,12 @@ public class DisciplineController {
   public ResponseEntity<?> deleteDiscipline(@PathVariable Long id) {
     disciplineService.deleteById(id);
     return ResponseEntity.ok().build();
+  }
+
+  @RequestMapping("/{id}/groups/")
+  public ResponseEntity<List<GroupDto>> getGroups(@PathVariable Long id) {
+    List<GroupDto> groupDtoList =
+        disciplineService.getGroups(id).stream().map(groupMapper::toDto).toList();
+    return ResponseEntity.ok(groupDtoList);
   }
 }
