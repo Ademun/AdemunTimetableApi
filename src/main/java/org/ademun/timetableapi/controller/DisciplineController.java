@@ -47,7 +47,7 @@ public class DisciplineController {
           disciplineService.save(disciplineMapper.fromDto(discipline)).orElseThrow());
       return ResponseEntity.ok(disciplineDto);
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body("Discipline with this name already exists");
+      return ResponseEntity.badRequest().body("A Discipline with this name already exists");
     }
   }
 
