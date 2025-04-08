@@ -61,7 +61,8 @@ public class GroupController {
   @PostMapping("/")
   public ResponseEntity<?> createGroup(@RequestBody GroupDto group) {
     try {
-      GroupDto groupDto = groupMapper.toDto(groupService.save(groupMapper.fromDto(group)));
+      GroupDto groupDto =
+          groupMapper.toDto(groupService.save(groupMapper.fromDto(group)).orElseThrow());
       return ResponseEntity.ok(groupDto);
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body("A group with this name already exists");
@@ -87,7 +88,8 @@ public class GroupController {
 
   @PutMapping("/")
   public ResponseEntity<GroupDto> updateGroup(@RequestBody GroupDto group) {
-    GroupDto groupDto = groupMapper.toDto(groupService.save(groupMapper.fromDto(group)));
+    GroupDto groupDto =
+        groupMapper.toDto(groupService.save(groupMapper.fromDto(group)).orElseThrow());
     return ResponseEntity.ok(groupDto);
   }
 

@@ -2,6 +2,7 @@ package org.ademun.timetableapi.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.ademun.timetableapi.entity.Discipline;
 import org.ademun.timetableapi.entity.Group;
 import org.ademun.timetableapi.entity.Professor;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@Slf4j
 @Service
 public class GroupService {
   private final GroupRepository groupRepository;
@@ -26,27 +28,33 @@ public class GroupService {
   }
 
   @Transactional
-  public Group save(Group group) throws IllegalArgumentException {
+  public Optional<Group> save(Group group) {
+    log.trace("Saving group {}", group.getName());
     if (!groupRepository.findByGroupName(group.getName()).isEmpty()) {
-      throw new IllegalArgumentException("Group with this name already exists");
+      log.warn("Group with this name already exists");
+      return Optional.empty();
     }
-    return groupRepository.save(group);
+    return Optional.of(groupRepository.save(group));
   }
 
   @Transactional
   public List<Group> findAll() {
+    log.trace("Retrieving all groups");
     return groupRepository.findAll();
   }
 
   @Transactional
   public Optional<Group> findById(Long id) {
+    log.trace("Retrieving group with id {}", id);
     return groupRepository.findById(id);
   }
 
   @Transactional
   public void deleteById(Long id) {
+    log.trace("Deleting group with id {}", id);
     Group group = groupRepository.findById(id).orElse(null);
     if (group == null) {
+      log.warn("Group with id {} not found", id);
       return;
     }
     group.getDisciplines().forEach(discipline -> discipline.getGroups().remove(group));
@@ -56,25 +64,34 @@ public class GroupService {
 
   @Transactional
   public Set<Discipline> getDisciplines(Long id) {
+    log.trace("Retrieving disciplines of group with id {}", id);
     Group group = groupRepository.findById(id).orElse(null);
-    if (group == null)
+    if (group == null) {
+      log.warn("Group with id {} not found", id);
       return Collections.emptySet();
+    }
     return group.getDisciplines();
   }
 
   @Transactional
   public Set<Professor> getProfessors(Long id) {
+    log.trace("Retrieving professors of group with id {}", id);
     Group group = groupRepository.findById(id).orElse(null);
-    if (group == null)
+    if (group == null) {
+      log.warn("Group with id {} not found", id);
       return Collections.emptySet();
+    }
     return group.getProfessors();
   }
 
   @Transactional
   public void addDiscipline(Long id, Discipline discipline) {
+    log.trace("Adding discipline {} to group with id {}", discipline.getName(), id);
     Group group = groupRepository.findById(id).orElse(null);
-    if (group == null)
+    if (group == null) {
+      log.warn("Group with id {} not found", id);
       return;
+    }
     Discipline uniqueDiscipline = getUniqueDiscipline(discipline);
     uniqueDiscipline.getGroups().add(group);
     entityManager.persist(uniqueDiscipline);
@@ -82,9 +99,13 @@ public class GroupService {
 
   @Transactional
   public void addProfessor(Long id, Professor professor) {
+    log.trace("Adding professor {} {} {} to group with id {}", professor.getFirstName(),
+        professor.getLastName(), professor.getPatronymic(), id);
     Group group = groupRepository.findById(id).orElse(null);
-    if (group == null)
+    if (group == null) {
+      log.warn("Group with id {} not found", id);
       return;
+    }
     Professor uniqueProfessor = getUniqueProfessor(professor);
     uniqueProfessor.getGroups().add(group);
     entityManager.persist(uniqueProfessor);
@@ -92,19 +113,25 @@ public class GroupService {
 
   @Transactional
   public void removeDiscipline(Long id, Long discipline_id) {
+    log.trace("Removing discipline with id {} from group with id {}", discipline_id, id);
     Group group = groupRepository.findById(id).orElse(null);
     Discipline discipline = entityManager.find(Discipline.class, discipline_id);
-    if (group == null || discipline == null)
+    if (group == null || discipline == null) {
+      log.warn("Group with id {} not found or discipline with id {} not found", id, discipline_id);
       return;
+    }
     discipline.getGroups().remove(group);
   }
 
   @Transactional
   public void removeProfessor(Long id, Long professor_id) {
+    log.trace("Removing professor with id {} from group with id {}", professor_id, id);
     Group group = groupRepository.findById(id).orElse(null);
     Professor professor = entityManager.find(Professor.class, professor_id);
-    if (group == null || professor == null)
+    if (group == null || professor == null) {
+      log.warn("Group with id {} not found or professor with id {} not found", id, professor_id);
       return;
+    }
     professor.getGroups().remove(group);
   }
 
@@ -113,7 +140,7 @@ public class GroupService {
         entityManager.createQuery("SELECT d FROM Discipline d WHERE d.name = :name")
             .setParameter("name", discipline.getName()).getResultList();
     if (disciplineList.size() > 1) {
-      //TODO: log
+      log.warn("Multiple disciplines found for name {}", discipline.getName());
     }
     if (disciplineList.isEmpty()) {
       return discipline;
@@ -128,7 +155,8 @@ public class GroupService {
         .setParameter("lastName", professor.getLastName())
         .setParameter("patronymic", professor.getPatronymic()).getResultList();
     if (professorList.size() > 1) {
-      //TODO: log
+      log.warn("Multiple professors found for name {} {} {}", professor.getFirstName(),
+          professor.getLastName(), professor.getPatronymic());
     }
     if (professorList.isEmpty()) {
       return professor;

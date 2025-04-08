@@ -42,8 +42,8 @@ public class ProfessorController {
   @PostMapping("/")
   public ResponseEntity<?> createProfessor(@RequestBody ProfessorDto professor) {
     try {
-      ProfessorDto professorDto =
-          professorMapper.toDto(professorService.save(professorMapper.fromDto(professor)));
+      ProfessorDto professorDto = professorMapper.toDto(
+          professorService.save(professorMapper.fromDto(professor)).orElseThrow());
       return ResponseEntity.ok(professorDto);
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body("Professor with this name already exists");
@@ -52,8 +52,8 @@ public class ProfessorController {
 
   @PutMapping("/")
   public ResponseEntity<ProfessorDto> updateProfessor(@RequestBody ProfessorDto professor) {
-    ProfessorDto professorDto =
-        professorMapper.toDto(professorService.save(professorMapper.fromDto(professor)));
+    ProfessorDto professorDto = professorMapper.toDto(
+        professorService.save(professorMapper.fromDto(professor)).orElseThrow());
     return ResponseEntity.ok(professorDto);
   }
 

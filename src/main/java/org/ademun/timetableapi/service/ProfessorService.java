@@ -1,6 +1,7 @@
 package org.ademun.timetableapi.service;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.ademun.timetableapi.entity.Group;
 import org.ademun.timetableapi.entity.Professor;
 import org.ademun.timetableapi.repository.ProfessorRepository;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@Slf4j
 @Service
 public class ProfessorService {
   private final ProfessorRepository professorRepository;
@@ -22,28 +24,36 @@ public class ProfessorService {
   }
 
   @Transactional
-  public Professor save(Professor professor) throws IllegalArgumentException {
+  public Optional<Professor> save(Professor professor) {
+    log.trace("Saving professor {}  {} {}", professor.getFirstName(), professor.getLastName(),
+        professor.getPatronymic());
     if (!professorRepository.findByProfessorFullName(professor.getFirstName(),
         professor.getLastName(), professor.getPatronymic()).isEmpty()) {
-      throw new IllegalArgumentException("Professor with this name already exists");
+      log.warn("Professor {} {} {} already exists", professor.getFirstName(),
+          professor.getLastName(), professor.getPatronymic());
+      return Optional.empty();
     }
-    return professorRepository.save(professor);
+    return Optional.of(professorRepository.save(professor));
   }
 
   @Transactional
   public List<Professor> findAll() {
+    log.trace("Retrieving all professors");
     return professorRepository.findAll();
   }
 
   @Transactional
   public Optional<Professor> findById(Long id) {
+    log.trace("Retrieving professor with id {}", id);
     return professorRepository.findById(id);
   }
 
   @Transactional
   public void deleteById(Long id) {
+    log.trace("Deleting professor with id {}", id);
     if (!getGroups(id).isEmpty()) {
-      throw new IllegalArgumentException("Cant delete professor which is used by groups");
+      log.warn("This professor is being used by other groups");
+      return;
     }
     professorRepository.deleteById(id);
   }
@@ -52,6 +62,7 @@ public class ProfessorService {
   public Set<Group> getGroups(Long id) {
     Professor professor = professorRepository.findById(id).orElse(null);
     if (professor == null) {
+      log.warn("Professor with id {} not found", id);
       return Collections.emptySet();
     }
     return professor.getGroups();

@@ -1,6 +1,7 @@
 package org.ademun.timetableapi.service;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.ademun.timetableapi.entity.Discipline;
 import org.ademun.timetableapi.entity.Group;
 import org.ademun.timetableapi.repository.DisciplineRepository;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@Slf4j
 @Service
 public class DisciplineService {
   private final DisciplineRepository disciplineRepository;
@@ -22,27 +24,33 @@ public class DisciplineService {
   }
 
   @Transactional
-  public Discipline save(Discipline discipline) throws IllegalArgumentException {
+  public Optional<Discipline> save(Discipline discipline) {
+    log.trace("Saving discipline {}", discipline.getName());
     if (!disciplineRepository.findByDisciplineName(discipline.getName()).isEmpty()) {
-      throw new IllegalArgumentException("Discipline with this name already exists");
+      log.warn("Discipline with name {} already exists", discipline.getName());
+      return Optional.empty();
     }
-    return disciplineRepository.save(discipline);
+    return Optional.of(disciplineRepository.save(discipline));
   }
 
   @Transactional
   public List<Discipline> findAll() {
+    log.trace("Retrieving all disciplines");
     return disciplineRepository.findAll();
   }
 
   @Transactional
   public Optional<Discipline> findById(Long id) {
+    log.trace("Retrieving discipline with id {}", id);
     return disciplineRepository.findById(id);
   }
 
   @Transactional
   public void deleteById(Long id) {
+    log.trace("Deleting discipline with id {}", id);
     if (!getGroups(id).isEmpty()) {
-      throw new IllegalArgumentException("Cant delete discipline which is used by groups");
+      log.warn("This discipline is being used by other groups");
+      return;
     }
     disciplineRepository.deleteById(id);
   }
@@ -51,6 +59,7 @@ public class DisciplineService {
   public Set<Group> getGroups(Long id) {
     Discipline discipline = disciplineRepository.findById(id).orElse(null);
     if (discipline == null) {
+      log.warn("Discipline with id {} not found", id);
       return Collections.emptySet();
     }
     return discipline.getGroups();

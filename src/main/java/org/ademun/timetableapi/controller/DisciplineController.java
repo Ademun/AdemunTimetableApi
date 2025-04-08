@@ -43,8 +43,8 @@ public class DisciplineController {
   @PostMapping("/")
   public ResponseEntity<?> createDiscipline(@RequestBody DisciplineDto discipline) {
     try {
-      DisciplineDto disciplineDto =
-          disciplineMapper.toDto(disciplineService.save(disciplineMapper.fromDto(discipline)));
+      DisciplineDto disciplineDto = disciplineMapper.toDto(
+          disciplineService.save(disciplineMapper.fromDto(discipline)).orElseThrow());
       return ResponseEntity.ok(disciplineDto);
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body("Discipline with this name already exists");
@@ -53,8 +53,8 @@ public class DisciplineController {
 
   @PutMapping("/")
   public ResponseEntity<DisciplineDto> updateDiscipline(@RequestBody DisciplineDto discipline) {
-    DisciplineDto disciplineDto =
-        disciplineMapper.toDto(disciplineService.save(disciplineMapper.fromDto(discipline)));
+    DisciplineDto disciplineDto = disciplineMapper.toDto(
+        disciplineService.save(disciplineMapper.fromDto(discipline)).orElseThrow());
     return ResponseEntity.ok(disciplineDto);
   }
 
