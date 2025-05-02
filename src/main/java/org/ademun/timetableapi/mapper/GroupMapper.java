@@ -1,7 +1,8 @@
 package org.ademun.timetableapi.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.ademun.timetableapi.dto.GroupDto;
+import org.ademun.timetableapi.dto.request.GroupRequest;
+import org.ademun.timetableapi.dto.response.GroupResponse;
 import org.ademun.timetableapi.entity.Group;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,11 +17,11 @@ public class GroupMapper {
     this.mapper = mapper;
   }
 
-  public Group fromDto(GroupDto dto) {
-    return mapper.convertValue(dto, Group.class);
+  public Group fromRequest(GroupRequest request) {
+    return mapper.convertValue(request, Group.class);
   }
 
-  public GroupDto toDto(Group group) {
-    return mapper.convertValue(group, GroupDto.class);
+  public GroupResponse toResponse(Group group) {
+    return mapper.convertValue(group, GroupResponse.class);
   }
 }

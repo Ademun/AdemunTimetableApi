@@ -1,4 +1,4 @@
-package org.ademun.timetableapi.dto;
+package org.ademun.timetableapi.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GroupDto {
+public class GroupResponse {
 
   private Long groupId;
   private String name;

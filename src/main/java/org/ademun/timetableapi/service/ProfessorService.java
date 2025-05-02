@@ -1,78 +1,90 @@
 package org.ademun.timetableapi.service;
 
+import exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.ademun.timetableapi.dto.request.ProfessorRequest;
+import org.ademun.timetableapi.dto.response.GroupResponse;
+import org.ademun.timetableapi.dto.response.ProfessorResponse;
 import org.ademun.timetableapi.entity.Group;
 import org.ademun.timetableapi.entity.Professor;
+import org.ademun.timetableapi.mapper.GroupMapper;
+import org.ademun.timetableapi.mapper.ProfessorMapper;
 import org.ademun.timetableapi.repository.ProfessorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 public class ProfessorService {
 
-  private final ProfessorRepository professorRepository;
+  private final ProfessorRepository repository;
+  private final ProfessorMapper mapper;
+  private final GroupMapper groupMapper;
 
   @Autowired
-  public ProfessorService(ProfessorRepository professorRepository) {
-    this.professorRepository = professorRepository;
+  public ProfessorService(ProfessorRepository repository,
+      ProfessorMapper mapper, GroupMapper groupMapper) {
+    this.repository = repository;
+    this.mapper = mapper;
+    this.groupMapper = groupMapper;
   }
 
-  @Transactional
-  public Professor save(Professor professor) throws IllegalArgumentException {
+  public ProfessorResponse save(ProfessorRequest request)
+      throws IllegalArgumentException {
+    Professor professor = mapper.fromRequest(request);
     if (checkIfExists(professor)) {
       throw new IllegalArgumentException(
-          "Professor with name " + professor.getFullName() + " already exists");
+          "Professor already exists");
     }
-    return professorRepository.save(professor);
+    return mapper.toResponse(repository.save(professor));
   }
 
-  @Transactional
-  public Professor update(Professor professor) throws IllegalArgumentException {
-    if (!checkIfExists(professor)) {
-      throw new IllegalArgumentException(
-          "Professor with name " + professor.getFullName() + " does not exist"
-      );
-    }
-    return professorRepository.save(professor);
+  public List<ProfessorResponse> findAll() {
+    return repository.findAll().stream().map(mapper::toResponse).toList();
   }
 
-  @Transactional
-  public List<Professor> findAll() {
-    return professorRepository.findAll();
+  public ProfessorResponse findById(Long id) {
+    return mapper.toResponse(repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Professor not found")));
   }
 
-  @Transactional
-  public Optional<Professor> findById(Long id) {
-    return professorRepository.findById(id);
+  public ProfessorResponse findByFullName(String name) {
+    String[] split = name.split(" ");
+    return mapper.toResponse(repository.findByProfessorFullName(split[0], split[1], split[2])
+        .orElseThrow(() -> new ResourceNotFoundException("Professor not found")));
   }
 
-  @Transactional
-  public Optional<Professor> findByFullName(String fullName) {
-    String[] splitName = fullName.split(" ");
-    return professorRepository.findByProfessorFullName(splitName[0], splitName[1], splitName[2]);
+  public Set<GroupResponse> findGroups(Long id) {
+    Set<Group> groups = repository.findById(id).map(Professor::getGroups).orElseThrow(
+        () -> new ResourceNotFoundException("Professor not found"));
+    return groups.stream().map(groupMapper::toResponse).collect(Collectors.toSet());
   }
 
-  @Transactional
-  public void deleteById(Long id) throws IllegalArgumentException {
-    if (!getGroups(id).isEmpty()) {
+  public ProfessorResponse update(Long id, ProfessorRequest request)
+      throws IllegalArgumentException {
+    Professor existing = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Professor not found"));
+    Professor professor = mapper.fromRequest(request);
+    existing.setFirstName(professor.getFirstName());
+    existing.setLastName(professor.getLastName());
+    existing.setPatronymic(professor.getPatronymic());
+    existing.setUrl(professor.getUrl());
+    return mapper.toResponse(repository.save(existing));
+  }
+
+  public void deleteById(Long id) {
+    if (!findGroups(id).isEmpty()) {
       throw new IllegalArgumentException(
           "Professor cannot be deleted because there are groups that are using it");
     }
-    professorRepository.deleteById(id);
+    repository.deleteById(id);
   }
 
-  @Transactional
-  public boolean checkIfExists(Professor professor) {
-    return professorRepository.findByProfessorFullName(professor.getFirstName(),
-        professor.getLastName(), professor.getPatronymic()).isPresent();
-  }
-
-  @Transactional
-  public Set<Group> getGroups(Long id) throws IllegalArgumentException {
-    return professorRepository.findById(id).map(Professor::getGroups).orElseThrow(
-        () -> new IllegalArgumentException("Professor with id" + id + " not found"));
+  private boolean checkIfExists(Professor professor) {
+    return repository.findByProfessorFullName(professor.getFirstName(), professor.getLastName(),
+        professor.getPatronymic()).isPresent();
   }
 }

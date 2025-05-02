@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -29,10 +31,14 @@ public class Group {
   private String name;
   @Column(name = "channel_id")
   private Long channelId;
-  @ManyToMany(mappedBy = "groups")
+  @ManyToMany
+  @JoinTable(name = "group_discipline", joinColumns = @JoinColumn(name = "group_id"),
+      inverseJoinColumns = @JoinColumn(name = "discipline_id"))
   @JsonIgnore
   private Set<Discipline> disciplines = new LinkedHashSet<>();
-  @ManyToMany(mappedBy = "groups")
+  @ManyToMany
+  @JoinTable(name = "group_professor", joinColumns = @JoinColumn(name = "group_id"),
+      inverseJoinColumns = @JoinColumn(name = "professor_id"))
   @JsonIgnore
   private Set<Professor> professors = new LinkedHashSet<>();
 }

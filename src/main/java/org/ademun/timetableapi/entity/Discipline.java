@@ -6,8 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -33,9 +31,7 @@ public class Discipline {
   private String name;
   @Column(name = "url")
   private String url;
-  @ManyToMany
-  @JoinTable(name = "group_discipline", joinColumns = @JoinColumn(name = "discipline_id"),
-      inverseJoinColumns = @JoinColumn(name = "group_id"))
+  @ManyToMany(mappedBy = "disciplines")
   @JsonIgnore
   private Set<Group> groups = new LinkedHashSet<>();
 }

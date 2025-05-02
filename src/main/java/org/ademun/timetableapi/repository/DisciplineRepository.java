@@ -1,5 +1,6 @@
 package org.ademun.timetableapi.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.ademun.timetableapi.entity.Discipline;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,4 +12,7 @@ public interface DisciplineRepository extends JpaRepository<Discipline, Long> {
 
   @Query("SELECT g FROM Discipline g where g.name = :disciplineName")
   Optional<Discipline> findDisciplineByName(String disciplineName);
+
+  @Query("SELECT d FROM Discipline d JOIN d.groups g WHERE g.name = :groupName")
+  List<Discipline> findByGroupName(String groupName);
 }

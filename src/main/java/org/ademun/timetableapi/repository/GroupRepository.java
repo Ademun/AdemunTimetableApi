@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
 
-  @Query("SELECT g FROM Group g where g.name = :groupName")
+  @Query("SELECT g FROM Group g WHERE g.name = :groupName")
   Optional<Group> findByGroupName(String groupName);
+
+  @Query("SELECT g FROM Group g WHERE g.channelId = :channelId")
+  Optional<Group> findByChannelId(Long channelId);
 }

@@ -1,7 +1,8 @@
 package org.ademun.timetableapi.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.ademun.timetableapi.dto.DisciplineDto;
+import org.ademun.timetableapi.dto.request.DisciplineRequest;
+import org.ademun.timetableapi.dto.response.DisciplineResponse;
 import org.ademun.timetableapi.entity.Discipline;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,11 +17,11 @@ public class DisciplineMapper {
     this.mapper = mapper;
   }
 
-  public Discipline fromDto(DisciplineDto dto) {
-    return mapper.convertValue(dto, Discipline.class);
+  public Discipline fromRequest(DisciplineRequest request) {
+    return mapper.convertValue(request, Discipline.class);
   }
 
-  public DisciplineDto toDto(Discipline discipline) {
-    return mapper.convertValue(discipline, DisciplineDto.class);
+  public DisciplineResponse toResponse(Discipline discipline) {
+    return mapper.convertValue(discipline, DisciplineResponse.class);
   }
 }

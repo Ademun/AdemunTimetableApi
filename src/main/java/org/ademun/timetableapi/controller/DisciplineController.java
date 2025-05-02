@@ -1,91 +1,70 @@
 package org.ademun.timetableapi.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
-import org.ademun.timetableapi.dto.DisciplineDto;
-import org.ademun.timetableapi.dto.GroupDto;
-import org.ademun.timetableapi.mapper.DisciplineMapper;
-import org.ademun.timetableapi.mapper.GroupMapper;
+import org.ademun.timetableapi.dto.request.DisciplineRequest;
+import org.ademun.timetableapi.dto.response.DisciplineResponse;
+import org.ademun.timetableapi.dto.response.GroupResponse;
 import org.ademun.timetableapi.service.DisciplineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/disciplines")
+@RequestMapping("/api/disciplines/")
 public class DisciplineController {
 
   private final DisciplineService disciplineService;
-  private final DisciplineMapper disciplineMapper;
-  private final GroupMapper groupMapper;
 
   @Autowired
-  public DisciplineController(DisciplineService disciplineService,
-      DisciplineMapper disciplineMapper, GroupMapper groupMapper) {
+  public DisciplineController(DisciplineService disciplineService) {
     this.disciplineService = disciplineService;
-    this.disciplineMapper = disciplineMapper;
-    this.groupMapper = groupMapper;
   }
 
-  @RequestMapping("/")
-  public ResponseEntity<List<DisciplineDto>> getDisciplines() {
-    List<DisciplineDto> disciplineDto =
-        disciplineService.findAll().stream().map(disciplineMapper::toDto).toList();
-    return ResponseEntity.ok(disciplineDto);
+  @PostMapping
+  public ResponseEntity<DisciplineResponse> createDiscipline(
+      @RequestBody @Valid DisciplineRequest discipline) {
+    return ResponseEntity.ok(disciplineService.save(discipline));
   }
 
-  @RequestMapping("/{id}")
-  public ResponseEntity<DisciplineDto> getDiscipline(@PathVariable Long id) {
-    return disciplineService.findById(id).map(disciplineMapper::toDto)
-        .map(ResponseEntity::ok)
-        .orElseGet(() -> ResponseEntity.notFound().build());
+  @GetMapping
+  public ResponseEntity<List<DisciplineResponse>> getDisciplines() {
+    return ResponseEntity.ok(disciplineService.findAll());
   }
 
-  @PostMapping("/")
-  public ResponseEntity<DisciplineDto> createDiscipline(@RequestBody DisciplineDto discipline) {
-    try {
-      DisciplineDto disciplineDto = disciplineMapper.toDto(
-          disciplineService.save(disciplineMapper.fromDto(discipline)));
-      return ResponseEntity.ok(disciplineDto);
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body(null);
-    }
+  @GetMapping("{id}")
+  public ResponseEntity<DisciplineResponse> getDisciplineById(@PathVariable Long id) {
+    return ResponseEntity.ok(disciplineService.findById(id));
   }
 
-  @PutMapping("/")
-  public ResponseEntity<DisciplineDto> updateDiscipline(@RequestBody DisciplineDto discipline) {
-    try {
-      DisciplineDto disciplineDto = disciplineMapper.toDto(
-          disciplineService.update(disciplineMapper.fromDto(discipline)));
-      return ResponseEntity.ok(disciplineDto);
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body(null);
-    }
+  @GetMapping(params = {"name"})
+  public ResponseEntity<DisciplineResponse> getDisciplineByName(@RequestParam String name) {
+    return ResponseEntity.ok(disciplineService.findByName(name));
   }
 
-  @DeleteMapping("/{id}")
+  @GetMapping("{id}/groups/")
+  public ResponseEntity<List<GroupResponse>> getGroups(@PathVariable Long id) {
+    return ResponseEntity.ok(disciplineService.findGroups(id).stream().toList());
+  }
+
+  @PutMapping("{id}")
+  public ResponseEntity<DisciplineResponse> updateDiscipline(
+      @PathVariable Long id,
+      @RequestBody @Valid DisciplineRequest discipline) {
+    return ResponseEntity.ok(disciplineService.update(id, discipline));
+  }
+
+  @DeleteMapping("{id}")
   public ResponseEntity<?> deleteDiscipline(@PathVariable Long id) {
-    try {
-      disciplineService.deleteById(id);
-      return ResponseEntity.noContent().build();
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body(null);
-    }
-  }
-
-  @RequestMapping("/{id}/groups/")
-  public ResponseEntity<List<GroupDto>> getGroups(@PathVariable Long id) {
-    try {
-      List<GroupDto> groupDtoList =
-          disciplineService.getGroups(id).stream().map(groupMapper::toDto).toList();
-      return ResponseEntity.ok(groupDtoList);
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body(null);
-    }
+    disciplineService.deleteById(id);
+    return ResponseEntity.noContent().build();
   }
 }

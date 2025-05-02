@@ -1,110 +1,145 @@
 package org.ademun.timetableapi.service;
 
+import exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.ademun.timetableapi.dto.request.DisciplineRequest;
+import org.ademun.timetableapi.dto.request.GroupRequest;
+import org.ademun.timetableapi.dto.request.ProfessorRequest;
+import org.ademun.timetableapi.dto.response.DisciplineResponse;
+import org.ademun.timetableapi.dto.response.GroupResponse;
+import org.ademun.timetableapi.dto.response.ProfessorResponse;
 import org.ademun.timetableapi.entity.Discipline;
 import org.ademun.timetableapi.entity.Group;
 import org.ademun.timetableapi.entity.Professor;
+import org.ademun.timetableapi.mapper.DisciplineMapper;
+import org.ademun.timetableapi.mapper.GroupMapper;
+import org.ademun.timetableapi.mapper.ProfessorMapper;
+import org.ademun.timetableapi.repository.DisciplineRepository;
 import org.ademun.timetableapi.repository.GroupRepository;
+import org.ademun.timetableapi.repository.ProfessorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 public class GroupService {
 
-  private final GroupRepository groupRepository;
-  private final DisciplineService disciplineService;
-  private final ProfessorService professorService;
+  private final GroupRepository repository;
+  private final DisciplineRepository disciplineRepository;
+  private final ProfessorRepository professorRepository;
+  private final GroupMapper mapper;
+  private final DisciplineMapper disciplineMapper;
+  private final ProfessorMapper professorMapper;
 
   @Autowired
-  public GroupService(GroupRepository groupRepository, DisciplineService disciplineService,
-      ProfessorService professorService) {
-    this.groupRepository = groupRepository;
-    this.disciplineService = disciplineService;
-    this.professorService = professorService;
+  public GroupService(GroupRepository repository, DisciplineRepository disciplineRepository,
+      ProfessorRepository professorRepository, GroupMapper mapper,
+      DisciplineMapper disciplineMapper, ProfessorMapper professorMapper) {
+    this.repository = repository;
+    this.disciplineRepository = disciplineRepository;
+    this.professorRepository = professorRepository;
+    this.mapper = mapper;
+    this.disciplineMapper = disciplineMapper;
+    this.professorMapper = professorMapper;
   }
 
-  @Transactional
-  public Group save(Group group) throws IllegalArgumentException {
+  public GroupResponse save(GroupRequest request) throws IllegalArgumentException {
+    Group group = mapper.fromRequest(request);
     if (checkIfExists(group)) {
-      throw new IllegalArgumentException("Group with name " + group.getName() + " already exists");
+      throw new IllegalArgumentException("Group already exists");
     }
-    return groupRepository.save(group);
+    return mapper.toResponse(repository.save(group));
   }
 
-  @Transactional
-  public List<Group> findAll() {
-    return groupRepository.findAll();
+  public List<GroupResponse> findAll() {
+    return repository.findAll().stream().map(mapper::toResponse).toList();
   }
 
-  @Transactional
-  public Optional<Group> findById(Long id) {
-    return groupRepository.findById(id);
+  public GroupResponse findById(Long id) {
+    return mapper.toResponse(repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Group not found")));
   }
 
-  @Transactional
-  public void deleteById(Long id) throws IllegalArgumentException {
-    Group group = groupRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Group with id " + id + " not found"));
-    group.getDisciplines().forEach(discipline -> discipline.getGroups().remove(group));
-    group.getProfessors().forEach(professor -> professor.getGroups().remove(group));
-    groupRepository.deleteById(id);
+  public GroupResponse findByName(String name) {
+    return mapper.toResponse(repository.findByGroupName(name)
+        .orElseThrow(() -> new ResourceNotFoundException("Group not found")));
   }
 
-  @Transactional
-  public Set<Discipline> getDisciplines(Long id) throws IllegalArgumentException {
-    Group group = groupRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Group with id " + id + " not found"));
-    return group.getDisciplines();
+  public GroupResponse findByChannelId(Long channelId) {
+    return mapper.toResponse(repository.findByChannelId(channelId)
+        .orElseThrow(() -> new ResourceNotFoundException("Group not found")));
   }
 
-  @Transactional
-  public Set<Professor> getProfessors(Long id) throws IllegalArgumentException {
-    Group group = groupRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Group with id " + id + " not found"));
-    return group.getProfessors();
+  public Set<DisciplineResponse> findDisciplines(Long id) {
+    Set<Discipline> disciplines = repository.findById(id).map(Group::getDisciplines)
+        .orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+    return disciplines.stream().map(disciplineMapper::toResponse).collect(Collectors.toSet());
   }
 
-  @Transactional
-  public void addDiscipline(Long id, Discipline discipline) throws IllegalArgumentException {
-    Group group = groupRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Group with id " + id + " not found"));
-    Discipline entry = disciplineService.findByName(discipline.getName())
-        .orElse(disciplineService.save(discipline));
-    entry.getGroups().add(group);
+  public Set<ProfessorResponse> findProfessors(Long id) {
+    Set<Professor> professors = repository.findById(id).map(Group::getProfessors)
+        .orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+    return professors.stream().map(professorMapper::toResponse).collect(Collectors.toSet());
   }
 
-  @Transactional
-  public void addProfessor(Long id, Professor professor) throws IllegalArgumentException {
-    Group group = groupRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Group with id " + id + " not found"));
-    Professor entry = professorService.findByFullName(professor.getFullName())
-        .orElse(professorService.save(professor));
-    entry.getGroups().add(group);
+  public GroupResponse update(Long id, GroupRequest request) throws IllegalArgumentException {
+    Group existing = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+    Group group = mapper.fromRequest(request);
+    existing.setName(group.getName());
+    existing.setChannelId(group.getChannelId());
+    return mapper.toResponse(repository.save(existing));
   }
 
-  @Transactional
-  public void removeDiscipline(Long groupId, Long disciplineId) throws IllegalArgumentException {
-    Group group = groupRepository.findById(groupId)
-        .orElseThrow(() -> new IllegalArgumentException("Group with id " + groupId + " not found"));
-    Discipline discipline = disciplineService.findById(disciplineId).orElseThrow(
-        () -> new IllegalArgumentException("Discipline with id " + disciplineId + " not found"));
+  public void deleteById(Long id) {
+    repository.deleteById(id);
+  }
+
+  public void addDiscipline(Long id, DisciplineRequest request) {
+    Group group = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+    Discipline discipline = disciplineRepository.findDisciplineByName(request.getName())
+        .orElseThrow(() -> new ResourceNotFoundException("Discipline not found"));
+    group.getDisciplines().add(discipline);
+    discipline.getGroups().add(group);
+    repository.save(group);
+  }
+
+  public void addProfessor(Long id, ProfessorRequest request) {
+    Group group = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+    Professor professor = professorRepository.findByProfessorFullName(request.getFirstName(),
+            request.getLastName(), request.getPatronymic())
+        .orElseThrow(() -> new ResourceNotFoundException("Professor not found"));
+    group.getProfessors().add(professor);
+    professor.getGroups().add(group);
+    repository.save(group);
+  }
+
+  public void removeDiscipline(Long groupId, Long disciplineId) {
+    Group group = repository.findById(groupId)
+        .orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+    Discipline discipline = disciplineRepository.findById(disciplineId)
+        .orElseThrow(() -> new ResourceNotFoundException("Discipline not found"));
+    group.getDisciplines().remove(discipline);
     discipline.getGroups().remove(group);
+    repository.save(group);
   }
 
-  @Transactional
-  public void removeProfessor(Long groupId, Long professorId) throws IllegalArgumentException {
-    Group group = groupRepository.findById(groupId)
-        .orElseThrow(() -> new IllegalArgumentException("Group with id " + groupId + " not found"));
-    Professor professor = professorService.findById(professorId).orElseThrow(
-        () -> new IllegalArgumentException("Professor with id " + professorId + " not found"));
+  public void removeProfessor(Long groupId, Long professorId) {
+    Group group = repository.findById(groupId)
+        .orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+    Professor professor = professorRepository.findById(professorId)
+        .orElseThrow(() -> new ResourceNotFoundException("Professor not found"));
+    group.getProfessors().remove(professor);
     professor.getGroups().remove(group);
+    repository.save(group);
   }
 
-  @Transactional
-  public boolean checkIfExists(Group group) {
-    return groupRepository.findByGroupName(group.getName()).isPresent();
+  private boolean checkIfExists(Group group) {
+    return repository.findByGroupName(group.getName()).isPresent();
   }
 }
