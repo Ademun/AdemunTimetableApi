@@ -1,5 +1,6 @@
 package org.ademun.timetableapi.controller;
 
+import java.util.List;
 import org.ademun.timetableapi.dto.DisciplineDto;
 import org.ademun.timetableapi.dto.GroupDto;
 import org.ademun.timetableapi.mapper.DisciplineMapper;
@@ -7,13 +8,18 @@ import org.ademun.timetableapi.mapper.GroupMapper;
 import org.ademun.timetableapi.service.DisciplineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/disciplines")
 public class DisciplineController {
+
   private final DisciplineService disciplineService;
   private final DisciplineMapper disciplineMapper;
   private final GroupMapper groupMapper;
@@ -35,39 +41,51 @@ public class DisciplineController {
 
   @RequestMapping("/{id}")
   public ResponseEntity<DisciplineDto> getDiscipline(@PathVariable Long id) {
-    DisciplineDto disciplineDto =
-        disciplineMapper.toDto(disciplineService.findById(id).orElseThrow());
-    return ResponseEntity.ok(disciplineDto);
+    return disciplineService.findById(id).map(disciplineMapper::toDto)
+        .map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   @PostMapping("/")
-  public ResponseEntity<?> createDiscipline(@RequestBody DisciplineDto discipline) {
+  public ResponseEntity<DisciplineDto> createDiscipline(@RequestBody DisciplineDto discipline) {
     try {
       DisciplineDto disciplineDto = disciplineMapper.toDto(
-          disciplineService.save(disciplineMapper.fromDto(discipline)).orElseThrow());
+          disciplineService.save(disciplineMapper.fromDto(discipline)));
       return ResponseEntity.ok(disciplineDto);
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body("A Discipline with this name already exists");
+      return ResponseEntity.badRequest().body(null);
     }
   }
 
   @PutMapping("/")
   public ResponseEntity<DisciplineDto> updateDiscipline(@RequestBody DisciplineDto discipline) {
-    DisciplineDto disciplineDto = disciplineMapper.toDto(
-        disciplineService.save(disciplineMapper.fromDto(discipline)).orElseThrow());
-    return ResponseEntity.ok(disciplineDto);
+    try {
+      DisciplineDto disciplineDto = disciplineMapper.toDto(
+          disciplineService.update(disciplineMapper.fromDto(discipline)));
+      return ResponseEntity.ok(disciplineDto);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(null);
+    }
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteDiscipline(@PathVariable Long id) {
-    disciplineService.deleteById(id);
-    return ResponseEntity.ok().build();
+    try {
+      disciplineService.deleteById(id);
+      return ResponseEntity.noContent().build();
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(null);
+    }
   }
 
   @RequestMapping("/{id}/groups/")
   public ResponseEntity<List<GroupDto>> getGroups(@PathVariable Long id) {
-    List<GroupDto> groupDtoList =
-        disciplineService.getGroups(id).stream().map(groupMapper::toDto).toList();
-    return ResponseEntity.ok(groupDtoList);
+    try {
+      List<GroupDto> groupDtoList =
+          disciplineService.getGroups(id).stream().map(groupMapper::toDto).toList();
+      return ResponseEntity.ok(groupDtoList);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(null);
+    }
   }
 }

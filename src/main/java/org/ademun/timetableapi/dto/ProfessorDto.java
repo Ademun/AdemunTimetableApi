@@ -8,7 +8,8 @@ import lombok.Setter;
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProfessorDto {
-  private Long professor_id;
+
+  private Long professorId;
   private String firstName;
   private String lastName;
   private String patronymic;

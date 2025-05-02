@@ -10,7 +10,8 @@ import lombok.ToString;
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DisciplineDto {
-  private Long discipline_id;
+
+  private Long disciplineId;
   private String name;
   private String url;
 }

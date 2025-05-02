@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DisciplineMapper {
+
   private final ObjectMapper mapper;
 
   @Autowired

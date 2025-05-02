@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GroupMapper {
+
   private final ObjectMapper mapper;
 
   @Autowired
