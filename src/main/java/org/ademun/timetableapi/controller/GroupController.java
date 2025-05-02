@@ -1,5 +1,6 @@
 package org.ademun.timetableapi.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.ademun.timetableapi.dto.request.DisciplineRequest;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/groups/")
+@Tag(name = "Группы", description = "Управление группами")
 public class GroupController {
 
   private final GroupService groupService;

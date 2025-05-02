@@ -1,4 +1,4 @@
-package exception;
+package org.ademun.timetableapi.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
 

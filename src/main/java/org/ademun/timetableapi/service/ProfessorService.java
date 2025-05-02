@@ -1,6 +1,5 @@
 package org.ademun.timetableapi.service;
 
-import exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +9,7 @@ import org.ademun.timetableapi.dto.response.GroupResponse;
 import org.ademun.timetableapi.dto.response.ProfessorResponse;
 import org.ademun.timetableapi.entity.Group;
 import org.ademun.timetableapi.entity.Professor;
+import org.ademun.timetableapi.exception.ResourceNotFoundException;
 import org.ademun.timetableapi.mapper.GroupMapper;
 import org.ademun.timetableapi.mapper.ProfessorMapper;
 import org.ademun.timetableapi.repository.ProfessorRepository;

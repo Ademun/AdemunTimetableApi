@@ -1,5 +1,6 @@
 package org.ademun.timetableapi.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.ademun.timetableapi.dto.request.ProfessorRequest;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/professors/")
+@Tag(name = "Преподаватели", description = "Управление преподавателями")
 public class ProfessorController {
 
   private final ProfessorService professorService;

@@ -1,4 +1,4 @@
-package exception;
+package org.ademun.timetableapi.exception;
 
 import org.ademun.timetableapi.dto.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
