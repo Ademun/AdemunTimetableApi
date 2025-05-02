@@ -9,6 +9,8 @@ import org.ademun.timetableapi.dto.response.DisciplineResponse;
 import org.ademun.timetableapi.dto.response.GroupResponse;
 import org.ademun.timetableapi.entity.Discipline;
 import org.ademun.timetableapi.entity.Group;
+import org.ademun.timetableapi.exception.ResourceAlreadyExistsException;
+import org.ademun.timetableapi.exception.ResourceIsBeingUsedException;
 import org.ademun.timetableapi.exception.ResourceNotFoundException;
 import org.ademun.timetableapi.mapper.DisciplineMapper;
 import org.ademun.timetableapi.mapper.GroupMapper;
@@ -32,11 +34,10 @@ public class DisciplineService {
     this.groupMapper = groupMapper;
   }
 
-  public DisciplineResponse save(DisciplineRequest request)
-      throws IllegalArgumentException {
+  public DisciplineResponse save(DisciplineRequest request) {
     Discipline discipline = mapper.fromRequest(request);
     if (checkIfExists(discipline)) {
-      throw new IllegalArgumentException(
+      throw new ResourceAlreadyExistsException(
           "Discipline already exists");
     }
     return mapper.toResponse(repository.save(discipline));
@@ -62,8 +63,7 @@ public class DisciplineService {
     return groups.stream().map(groupMapper::toResponse).collect(Collectors.toSet());
   }
 
-  public DisciplineResponse update(Long id, DisciplineRequest request)
-      throws IllegalArgumentException {
+  public DisciplineResponse update(Long id, DisciplineRequest request) {
     Discipline existing = repository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Discipline not found"));
     Discipline discipline = mapper.fromRequest(request);
@@ -74,7 +74,7 @@ public class DisciplineService {
 
   public void deleteById(Long id) {
     if (!findGroups(id).isEmpty()) {
-      throw new IllegalArgumentException(
+      throw new ResourceIsBeingUsedException(
           "Discipline cannot be deleted because there are groups that are using it");
     }
     repository.deleteById(id);

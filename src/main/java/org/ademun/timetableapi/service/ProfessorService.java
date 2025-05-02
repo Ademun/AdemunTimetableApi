@@ -9,6 +9,8 @@ import org.ademun.timetableapi.dto.response.GroupResponse;
 import org.ademun.timetableapi.dto.response.ProfessorResponse;
 import org.ademun.timetableapi.entity.Group;
 import org.ademun.timetableapi.entity.Professor;
+import org.ademun.timetableapi.exception.ResourceAlreadyExistsException;
+import org.ademun.timetableapi.exception.ResourceIsBeingUsedException;
 import org.ademun.timetableapi.exception.ResourceNotFoundException;
 import org.ademun.timetableapi.mapper.GroupMapper;
 import org.ademun.timetableapi.mapper.ProfessorMapper;
@@ -32,11 +34,10 @@ public class ProfessorService {
     this.groupMapper = groupMapper;
   }
 
-  public ProfessorResponse save(ProfessorRequest request)
-      throws IllegalArgumentException {
+  public ProfessorResponse save(ProfessorRequest request) {
     Professor professor = mapper.fromRequest(request);
     if (checkIfExists(professor)) {
-      throw new IllegalArgumentException(
+      throw new ResourceAlreadyExistsException(
           "Professor already exists");
     }
     return mapper.toResponse(repository.save(professor));
@@ -63,8 +64,7 @@ public class ProfessorService {
     return groups.stream().map(groupMapper::toResponse).collect(Collectors.toSet());
   }
 
-  public ProfessorResponse update(Long id, ProfessorRequest request)
-      throws IllegalArgumentException {
+  public ProfessorResponse update(Long id, ProfessorRequest request) {
     Professor existing = repository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Professor not found"));
     Professor professor = mapper.fromRequest(request);
@@ -77,7 +77,7 @@ public class ProfessorService {
 
   public void deleteById(Long id) {
     if (!findGroups(id).isEmpty()) {
-      throw new IllegalArgumentException(
+      throw new ResourceIsBeingUsedException(
           "Professor cannot be deleted because there are groups that are using it");
     }
     repository.deleteById(id);

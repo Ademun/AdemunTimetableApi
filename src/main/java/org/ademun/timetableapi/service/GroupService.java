@@ -13,6 +13,7 @@ import org.ademun.timetableapi.dto.response.ProfessorResponse;
 import org.ademun.timetableapi.entity.Discipline;
 import org.ademun.timetableapi.entity.Group;
 import org.ademun.timetableapi.entity.Professor;
+import org.ademun.timetableapi.exception.ResourceAlreadyExistsException;
 import org.ademun.timetableapi.exception.ResourceNotFoundException;
 import org.ademun.timetableapi.mapper.DisciplineMapper;
 import org.ademun.timetableapi.mapper.GroupMapper;
@@ -46,10 +47,10 @@ public class GroupService {
     this.professorMapper = professorMapper;
   }
 
-  public GroupResponse save(GroupRequest request) throws IllegalArgumentException {
+  public GroupResponse save(GroupRequest request) {
     Group group = mapper.fromRequest(request);
     if (checkIfExists(group)) {
-      throw new IllegalArgumentException("Group already exists");
+      throw new ResourceAlreadyExistsException("Group already exists");
     }
     return mapper.toResponse(repository.save(group));
   }
@@ -85,7 +86,7 @@ public class GroupService {
     return professors.stream().map(professorMapper::toResponse).collect(Collectors.toSet());
   }
 
-  public GroupResponse update(Long id, GroupRequest request) throws IllegalArgumentException {
+  public GroupResponse update(Long id, GroupRequest request) {
     Group existing = repository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Group not found"));
     Group group = mapper.fromRequest(request);
