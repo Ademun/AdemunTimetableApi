@@ -10,10 +10,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProfessorRepository extends JpaRepository<Professor, Long> {
 
-  @Query(
-      "SELECT p FROM Professor p where p.firstName = :firstName AND p.lastName = :lastname AND p.patronymic = :patronymic")
-  Optional<Professor> findByProfessorFullName(String firstName, String lastName, String patronymic);
+  @Query("SELECT p FROM Professor p where LOWER(p.firstName) = LOWER(:firstName) AND LOWER(p.lastName) = LOWER(:lastName) AND LOWER(p.patronymic) = LOWER(:patronymic)")
+  Optional<Professor> findByFullName(String firstName, String lastName, String patronymic);
 
-  @Query("SELECT p FROM Professor p JOIN p.groups g WHERE g.name = :groupName")
+  @Query("SELECT p FROM Professor p JOIN p.groups g WHERE REPLACE(LOWER(g.name), ' ', '') = REPLACE(LOWER(:groupName), ' ', '')")
   List<Professor> findByGroupName(String groupName);
 }

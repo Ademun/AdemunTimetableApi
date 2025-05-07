@@ -47,7 +47,7 @@ public class ProfessorController {
     return ResponseEntity.ok(professorService.findById(id));
   }
 
-  @GetMapping(params = {"fullName"})
+  @GetMapping(params = {"name"})
   public ResponseEntity<ProfessorResponse> getProfessorByName(@RequestParam String name) {
     return ResponseEntity.ok(professorService.findByFullName(name));
   }

@@ -10,9 +10,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DisciplineRepository extends JpaRepository<Discipline, Long> {
 
-  @Query("SELECT g FROM Discipline g where g.name = :disciplineName")
+  @Query("SELECT g FROM Discipline g where REPLACE(LOWER(g.name), ' ', '') = REPLACE(LOWER(:disciplineName), ' ', '')")
   Optional<Discipline> findDisciplineByName(String disciplineName);
 
-  @Query("SELECT d FROM Discipline d JOIN d.groups g WHERE g.name = :groupName")
+  @Query("SELECT d FROM Discipline d JOIN d.groups g WHERE REPLACE(LOWER(g.name), ' ', '') = REPLACE(LOWER(:groupName), ' ', '')")
   List<Discipline> findByGroupName(String groupName);
 }

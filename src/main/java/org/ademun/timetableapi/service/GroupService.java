@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.ademun.timetableapi.dto.request.DisciplineRequest;
 import org.ademun.timetableapi.dto.request.GroupRequest;
 import org.ademun.timetableapi.dto.request.ProfessorRequest;
@@ -24,6 +25,7 @@ import org.ademun.timetableapi.repository.ProfessorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @Transactional
 public class GroupService {
@@ -112,7 +114,7 @@ public class GroupService {
   public void addProfessor(Long id, ProfessorRequest request) {
     Group group = repository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Group not found"));
-    Professor professor = professorRepository.findByProfessorFullName(request.getFirstName(),
+    Professor professor = professorRepository.findByFullName(request.getFirstName(),
             request.getLastName(), request.getPatronymic())
         .orElseThrow(() -> new ResourceNotFoundException("Professor not found"));
     group.getProfessors().add(professor);

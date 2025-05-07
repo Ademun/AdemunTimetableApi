@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.ademun.timetableapi.dto.request.ProfessorRequest;
 import org.ademun.timetableapi.dto.response.GroupResponse;
 import org.ademun.timetableapi.dto.response.ProfessorResponse;
@@ -18,6 +19,7 @@ import org.ademun.timetableapi.repository.ProfessorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @Transactional
 public class ProfessorService {
@@ -54,7 +56,7 @@ public class ProfessorService {
 
   public ProfessorResponse findByFullName(String name) {
     String[] split = name.split(" ");
-    return mapper.toResponse(repository.findByProfessorFullName(split[0], split[1], split[2])
+    return mapper.toResponse(repository.findByFullName(split[0], split[1], split[2])
         .orElseThrow(() -> new ResourceNotFoundException("Professor not found")));
   }
 
@@ -84,7 +86,7 @@ public class ProfessorService {
   }
 
   private boolean checkIfExists(Professor professor) {
-    return repository.findByProfessorFullName(professor.getFirstName(), professor.getLastName(),
+    return repository.findByFullName(professor.getFirstName(), professor.getLastName(),
         professor.getPatronymic()).isPresent();
   }
 }
